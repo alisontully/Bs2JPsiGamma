@@ -54,6 +54,7 @@ void Fitter::readTree(TString fname, TString tname){
 	RooDataSet *mcJpsiX = new RooDataSet("mcJpsiX","mcJpsiX",RooArgSet(*(w->var("mass"))));
 	RooDataSet *mcBd = new RooDataSet("mcBd","mcBd",RooArgSet(*(w->var("mass"))));
 	RooDataSet *mcBu = new RooDataSet("mcBu","mcBu",RooArgSet(*(w->var("mass"))));
+  RooDataSet *dataKst = new RooDataSet("dataKst","dataKst",RooArgSet(*(w->var("mass"))));
 
 	double B0_M;
 	float bdtoutput;
@@ -87,10 +88,12 @@ void Fitter::readTree(TString fname, TString tname){
 			mcBu->add(RooArgSet(*(w->var("mass"))));
 			mcJpsiX->add(RooArgSet(*(w->var("mass"))));
 		}
-		//if ( itype == 82 ) {
 		if ( itype == 71 || itype == 81 ) {
 			data->add(RooArgSet(*(w->var("mass"))));
 		}
+		if ( itype == 72 || itype == 82 ) {
+      dataKst->add(RooArgSet(*(w->var("mass"))));
+    }
 	}
 
 	w->import(*data);
@@ -99,6 +102,7 @@ void Fitter::readTree(TString fname, TString tname){
 	w->import(*mcBd);
 	w->import(*mcBu);
 	w->import(*mcJpsiX);
+  w->import(*dataKst);
 
 	delete tree;
 	tf->Close();
@@ -109,6 +113,7 @@ void Fitter::readTree(TString fname, TString tname){
 	delete mcBd;
 	delete mcBu;
 	delete mcJpsiX;
+  delete dataKst;
 }
 
 void Fitter::constructSignalPdf(){
