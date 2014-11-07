@@ -7,6 +7,9 @@
 //                                 //
 /////////////////////////////////////
 
+#include <fstream>
+#include "TTimeStamp.h"
+
 #include "../interface/Runner.h"
 
 using namespace std;
@@ -88,7 +91,7 @@ void Runner::run(){
 		if (firstEntry<0) firstEntry=0;
 		if (lastEntry<0) lastEntry=jentries;
 
-		for (Long64_t jentry=0; jentry<jentries; jentry++){
+		for (Long64_t jentry=firstEntry; jentry<lastEntry; jentry++){
 
 			if (jentry%int(TMath::Ceil(jentries/1000))==0) {
 				printProgressBar(jentry);
@@ -119,16 +122,26 @@ void Runner::run(){
 		analysers[a]->Term(looper);
 	}
 
+  ofstream outf("cutflow.log");
+  TTimeStamp s;
+
 	// Summarise results
 	cout << Form("%-30s","Runner::run()") << " " << "Analysers cut flow summary:" << endl;
+  outf << "Timestamp = " << s.AsString() << endl;
+  outf << "Analysers cut flow summary:" << endl;
 	for (unsigned int t=0; t<looper->treeContainers.size(); t++){
 		cout << Form("%-30s","Runner::run()") << " " << "   " << looper->treeContainers[t].name << " : " << endl;
+    outf << "   " << looper->treeContainers[t].name << " : " << endl;
 		for (unsigned int a=0; a<analysers.size(); a++){
 			double eff = double(nPassFail[t][a].first)/double(nPassFail[t][a].first + nPassFail[t][a].second) * 100.;
 			cout << Form("%-30s","Runner::run()") << " " << "      " << a+1 << ".) " << Form("%-15s",(analysers[a]->name+":").Data()) << "  " <<	nPassFail[t][a].first << "/" << nPassFail[t][a].first + nPassFail[t][a].second << " of events passed -- " << Form("%6.2f%%",eff) << " efficient" << endl;
+      outf << "      " << a+1 << ".) " << Form("%-15s",(analysers[a]->name+":").Data()) << "  " <<	nPassFail[t][a].first << "/" << nPassFail[t][a].first + nPassFail[t][a].second << " of events passed -- " << Form("%6.2f%%",eff) << " efficient" << endl;
 		}
 	}
 
 	cout << Form("%-30s","Runner::run()") << " " << "Processing complete. Accepted " << naccepted << " / " << nentries << " events -- " << Form("%6.2f%%",100.*double(naccepted)/double(nentries)) << " efficient" << endl;
+  outf << "Processing complete. Accepted " << naccepted << " / " << nentries << " events -- " << Form("%6.2f%%",100.*double(naccepted)/double(nentries)) << " efficient" << endl;
+
+  outf.close();
 }
 

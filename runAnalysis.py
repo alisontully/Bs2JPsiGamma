@@ -8,6 +8,8 @@ parser.add_option("-t","--treename",default="AnalysisTree",help="Name of output 
 parser.add_option("-r","--runAsReduction",default=False,action="store_true")
 parser.add_option("--dryRun",default=False,action="store_true",help="Don't actually run anything")
 parser.add_option("-v","--verbose",default=False,action="store_true")
+parser.add_option("-f","--firstEvent",type="int")
+parser.add_option("-l","--lastEvent",type="int")
 (opts,args) = parser.parse_args()
 
 import ROOT as r
@@ -90,6 +92,9 @@ else:
 	branchdefclass = getBranchDef()
 	runner = r.Runner(outt,branchdefclass,"Runner")
 	cfg = configProducer(runner,cfg_file,opts.verbose)
+
+	if opts.firstEvent: runner.setFirstEntry(opts.firstEvent)
+	if opts.lastEvent: runner.setLastEntry(opts.lastEvent)
 
 	runner.run()
 

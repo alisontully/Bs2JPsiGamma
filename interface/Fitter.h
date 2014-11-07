@@ -3,6 +3,7 @@
 
 #include "TString.h"
 #include "RooWorkspace.h"
+#include "../interface/DataSet.h"
 
 class Fitter {
 
@@ -11,12 +12,21 @@ class Fitter {
 		Fitter(TString wsname="w");
 		~Fitter();
 
-		void setup(TString fname, TString tname);
-		void plot();
-		void fit();
+    void addObsVar(TString name, double min, double max);
+    void setUnit(TString var, TString unit);
+    void setBins(TString var, int bins);
+
+    void makeObsVars();
+    void makeDatasets();
+		void fillDatasets(TString fname, TString tname);
+
+    void constructPdfs();
+    void doKstarSplot();
+
+    void plot();
+    void fit();
 		void save(TString fname);
 
-		void setMassRange(double mlow, double mhigh);
 		void setBDTCut(double val);
 
 		RooWorkspace *w;
@@ -28,13 +38,19 @@ class Fitter {
 		void constructJpsiXPdf();
 		void constructBkgPdf();
 		void constructFullPdf();
+    void constructKstarGamMCPdf();
+    void constructKstarDataPdf();
 
-		void readTree(TString fname, TString tname);
+    void defineParamSet(TString pdf);
 
-		std::pair<double,double> massRange;
+    void plot(TString var, TString data, TString pdf="");
+		void fit(TString pdf, TString data);
+    void freeze(TString pdf);
+
 		float bdtcut;
 		bool hasfit;
 
+    std::vector<DataSet> dataSets;
 
 
 
