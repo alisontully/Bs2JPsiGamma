@@ -63,6 +63,8 @@ class Looper {
 		// user added variables
 		Float_t         *bdtoutput;
 		TBranch         *b_bdtoutput;
+    Double_t        *phi_mass;
+    Double_t        *b_phi_mass;
 
   	// branch variables
     Int_t           *B0_BKGCAT;
@@ -442,6 +444,18 @@ class Looper {
     Int_t           *nVeloTracks;
     UInt_t          *runNumber;
     ULong64_t       *totCandidates;
+    Double_t        *Kplus_PIDK;
+    Double_t        *piminus_PIDK;
+    Double_t        *Kplus_PX;
+    Double_t        *Kplus_PY;
+    Double_t        *Kplus_PZ;
+    Double_t        *Kplus_PE;
+    Double_t        *Kplus_P;
+    Double_t        *piminus_PX;
+    Double_t        *piminus_PY;
+    Double_t        *piminus_PZ;
+    Double_t        *piminus_PE;
+    Double_t        *piminus_P;
 
  	// branch definitions
     TBranch *b_B0_BKGCAT;
@@ -821,6 +835,18 @@ class Looper {
     TBranch *b_nVeloTracks;
     TBranch *b_runNumber;
     TBranch *b_totCandidates;
+    TBranch *b_Kplus_PIDK;
+    TBranch *b_Kplus_PX;
+    TBranch *b_Kplus_PY;
+    TBranch *b_Kplus_PZ;
+    TBranch *b_Kplus_PE;
+    TBranch *b_Kplus_P;
+    TBranch *b_piminus_PIDK;
+    TBranch *b_piminus_PX;
+    TBranch *b_piminus_PY;
+    TBranch *b_piminus_PZ;
+    TBranch *b_piminus_PE;
+    TBranch *b_piminus_P;
 
 };
 

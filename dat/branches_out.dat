@@ -112,3 +112,6 @@ Double_t        muplus_PZ                                    0
 Int_t           nPVs                                         0
 # USER ADDED
 Float_t         bdtoutput                                    0
+Double_t        Kplus_PIDK                                   0
+Double_t        piminus_PIDK                                 0
+Double_t        phi_mass                                     0

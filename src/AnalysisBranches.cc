@@ -89,6 +89,12 @@ void AnalysisBranches::setInputBranches(Looper *l, TTree *tree){
 	tree->SetBranchAddress("Jpsi_PX", l->Jpsi_PX, &(l->b_Jpsi_PX));
 	tree->SetBranchAddress("Jpsi_PY", l->Jpsi_PY, &(l->b_Jpsi_PY));
 	tree->SetBranchAddress("Jpsi_PZ", l->Jpsi_PZ, &(l->b_Jpsi_PZ));
+	tree->SetBranchAddress("Kplus_P", l->Kplus_P, &(l->b_Kplus_P));
+	tree->SetBranchAddress("Kplus_PE", l->Kplus_PE, &(l->b_Kplus_PE));
+	tree->SetBranchAddress("Kplus_PIDK", l->Kplus_PIDK, &(l->b_Kplus_PIDK));
+	tree->SetBranchAddress("Kplus_PX", l->Kplus_PX, &(l->b_Kplus_PX));
+	tree->SetBranchAddress("Kplus_PY", l->Kplus_PY, &(l->b_Kplus_PY));
+	tree->SetBranchAddress("Kplus_PZ", l->Kplus_PZ, &(l->b_Kplus_PZ));
 	tree->SetBranchAddress("Polarity", l->Polarity, &(l->b_Polarity));
 	tree->SetBranchAddress("eminus_CosTheta", l->eminus_CosTheta, &(l->b_eminus_CosTheta));
 	tree->SetBranchAddress("eminus_M", l->eminus_M, &(l->b_eminus_M));
@@ -166,6 +172,12 @@ void AnalysisBranches::setInputBranches(Looper *l, TTree *tree){
 	tree->SetBranchAddress("nMuonCoordsS4", l->nMuonCoordsS4, &(l->b_nMuonCoordsS4));
 	tree->SetBranchAddress("nMuonTracks", l->nMuonTracks, &(l->b_nMuonTracks));
 	tree->SetBranchAddress("nPVs", l->nPVs, &(l->b_nPVs));
+	tree->SetBranchAddress("piminus_P", l->piminus_P, &(l->b_piminus_P));
+	tree->SetBranchAddress("piminus_PE", l->piminus_PE, &(l->b_piminus_PE));
+	tree->SetBranchAddress("piminus_PIDK", l->piminus_PIDK, &(l->b_piminus_PIDK));
+	tree->SetBranchAddress("piminus_PX", l->piminus_PX, &(l->b_piminus_PX));
+	tree->SetBranchAddress("piminus_PY", l->piminus_PY, &(l->b_piminus_PY));
+	tree->SetBranchAddress("piminus_PZ", l->piminus_PZ, &(l->b_piminus_PZ));
 	tree->SetBranchAddress("runNumber", l->runNumber, &(l->b_runNumber));
 	tree->SetBranchAddress("totCandidates", l->totCandidates, &(l->b_totCandidates));
 
@@ -252,6 +264,12 @@ void AnalysisBranches::initialiseVariables(Looper *l) {
 	l->Jpsi_PX                               = new Double_t(0);
 	l->Jpsi_PY                               = new Double_t(0);
 	l->Jpsi_PZ                               = new Double_t(0);
+	l->Kplus_P                               = new Double_t(0);
+	l->Kplus_PE                              = new Double_t(0);
+	l->Kplus_PIDK                            = new Double_t(0);
+	l->Kplus_PX                              = new Double_t(0);
+	l->Kplus_PY                              = new Double_t(0);
+	l->Kplus_PZ                              = new Double_t(0);
 	l->Polarity                              = new Short_t(0);
 	l->bdtoutput                             = new Float_t(0);
 	l->eminus_CosTheta                       = new Double_t(0);
@@ -330,6 +348,13 @@ void AnalysisBranches::initialiseVariables(Looper *l) {
 	l->nMuonCoordsS4                         = new Int_t(0);
 	l->nMuonTracks                           = new Int_t(0);
 	l->nPVs                                  = new Int_t(0);
+	l->phi_mass                              = new Double_t(0);
+	l->piminus_P                             = new Double_t(0);
+	l->piminus_PE                            = new Double_t(0);
+	l->piminus_PIDK                          = new Double_t(0);
+	l->piminus_PX                            = new Double_t(0);
+	l->piminus_PY                            = new Double_t(0);
+	l->piminus_PZ                            = new Double_t(0);
 	l->runNumber                             = new UInt_t(0);
 	l->totCandidates                         = new ULong64_t(0);
 
@@ -416,6 +441,12 @@ void AnalysisBranches::cleanVariables(Looper *l) {
 	delete l->Jpsi_PX;
 	delete l->Jpsi_PY;
 	delete l->Jpsi_PZ;
+	delete l->Kplus_P;
+	delete l->Kplus_PE;
+	delete l->Kplus_PIDK;
+	delete l->Kplus_PX;
+	delete l->Kplus_PY;
+	delete l->Kplus_PZ;
 	delete l->Polarity;
 	delete l->bdtoutput;
 	delete l->eminus_CosTheta;
@@ -494,6 +525,13 @@ void AnalysisBranches::cleanVariables(Looper *l) {
 	delete l->nMuonCoordsS4;
 	delete l->nMuonTracks;
 	delete l->nPVs;
+	delete l->phi_mass;
+	delete l->piminus_P;
+	delete l->piminus_PE;
+	delete l->piminus_PIDK;
+	delete l->piminus_PX;
+	delete l->piminus_PY;
+	delete l->piminus_PZ;
 	delete l->runNumber;
 	delete l->totCandidates;
 }
@@ -542,6 +580,7 @@ void AnalysisBranches::setOutputBranches(Looper *l, TTree *tree){
 	tree->Branch("Jpsi_PX",l->Jpsi_PX);
 	tree->Branch("Jpsi_PY",l->Jpsi_PY);
 	tree->Branch("Jpsi_PZ",l->Jpsi_PZ);
+	tree->Branch("Kplus_PIDK",l->Kplus_PIDK);
 	tree->Branch("Polarity",l->Polarity);
 	tree->Branch("bdtoutput",l->bdtoutput);
 	tree->Branch("eminus_CosTheta",l->eminus_CosTheta);
@@ -612,5 +651,7 @@ void AnalysisBranches::setOutputBranches(Looper *l, TTree *tree){
 	tree->Branch("muplus_PY",l->muplus_PY);
 	tree->Branch("muplus_PZ",l->muplus_PZ);
 	tree->Branch("nPVs",l->nPVs);
+	tree->Branch("phi_mass",l->phi_mass);
+	tree->Branch("piminus_PIDK",l->piminus_PIDK);
 }
 

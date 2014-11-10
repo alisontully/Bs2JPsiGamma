@@ -1,9 +1,10 @@
 #ifndef Fitter_h
 #define Fitter_h
 
+#include "TCanvas.h"
 #include "TString.h"
 #include "RooWorkspace.h"
-#include "../interface/DataSet.h"
+#include "../interface/FitterUtils.h"
 
 class Fitter {
 
@@ -13,6 +14,7 @@ class Fitter {
 		~Fitter();
 
     void addObsVar(TString name, double min, double max);
+    void addObsVar(TString name, TString title, TString unit, double min, double max);
     void setUnit(TString var, TString unit);
     void setBins(TString var, int bins);
 
@@ -23,8 +25,6 @@ class Fitter {
     void constructPdfs();
     void doKstarSplot();
 
-    void plot();
-    void fit();
 		void save(TString fname);
 
 		void setBDTCut(double val);
@@ -44,15 +44,19 @@ class Fitter {
     void defineParamSet(TString pdf);
 
     void plot(TString var, TString data, TString pdf="");
+    void plot(TString var, std::vector<PlotComponent> plotComps, TString fname);
 		void fit(TString pdf, TString data);
+    void splot(TString var, TString data);
+    void splot(TString var, TString data, std::vector<TString> compDsets);
     void freeze(TString pdf);
 
 		float bdtcut;
-		bool hasfit;
 
     std::vector<DataSet> dataSets;
+    std::vector<int> colors;
 
-
+    std::vector<TCanvas*> canvs;
+    TCanvas* createCanvas();
 
 };
 

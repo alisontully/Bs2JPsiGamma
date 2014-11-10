@@ -88,7 +88,7 @@ bool BDTReader::AnalyseEvent(Looper *l){
   //if ((l->itype>0) && (*l->B0_MM < 5500 || *l->B0_MM > 6500)) return false;
 
 	// bdt cut?
-	if ( *l->bdtoutput < 0.2 ) return false;
+	//if ( *l->bdtoutput < 0.2 ) return false;
 
 	// step up counter
 	evCount++;

@@ -1,14 +1,25 @@
-#ifndef DataSet_h
-#define DataSet_h
+#ifndef FitterUtils_h
+#define FitterUtils_h
 
 #include <iostream>
 #include <vector>
 #include "TString.h"
+#include "TLegend.h"
 #include "RooWorkspace.h"
 #include "RooArgSet.h"
 #include "RooAbsReal.h"
 #include "RooRealVar.h"
 #include "RooAbsArg.h"
+#include "RooPlot.h"
+#include "RooAbsData.h"
+#include "RooAbsPdf.h"
+
+// mock class to trick cint
+class FitterUtils {
+  public:
+    FitterUtils(){ std::cout << "FitterUtils::FitterUtils() is not a real class" << std::endl;}
+    ~FitterUtils(){}
+};
 
 class DataSet {
 
@@ -29,6 +40,28 @@ class DataSet {
     RooWorkspace *w;
 
     void addType(int type) { itypes.push_back(type); }
+};
+
+class PlotComponent {
+
+  public:
+    PlotComponent(TString _name, TString _title);
+    PlotComponent(TString _name, TString _title, int _lcolor);
+    PlotComponent(TString _name, TString _title, int _lcolor, int _lstyle);
+
+    void plotOn(RooWorkspace *w, RooPlot *plot, TLegend *leg=NULL);
+
+    TString name;
+    TString title;
+    int lcolor;
+    int lstyle;
+    int lwidth;
+    int mcolor;
+    int mstyle;
+    int fcolor;
+    int fstyle;
+    TString doption;
+
 };
 
 #endif

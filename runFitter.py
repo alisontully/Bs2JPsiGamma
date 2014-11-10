@@ -27,4 +27,4 @@ fitter.save(opts.outfile)
 
 sw.Stop()
 
-if opts.interactive: raw_input('Done')
+if opts.interactive: raw_input('Done\n')

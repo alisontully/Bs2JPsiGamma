@@ -26,14 +26,16 @@ using namespace std;
 using namespace RooFit;
 
 Fitter::Fitter(TString wsname):
-	bdtcut(0.2),
-	hasfit(false)
+	bdtcut(0.2)
 {
   gROOT->ProcessLine(".x /Users/matt/Scratch/lhcb/lhcbStyle.C");
 	w = new RooWorkspace(wsname);
 	RooArgSet *observables = new RooArgSet();
 	w->defineSet("observables",*observables);
 	delete observables;
+  colors.push_back(kRed);
+  colors.push_back(kBlue);
+  colors.push_back(kGreen+1);
 }
 
 Fitter::~Fitter(){
@@ -42,14 +44,35 @@ Fitter::~Fitter(){
 	//delete tf;
 }
 
+TCanvas* Fitter::createCanvas(){
+
+  int canv_w = 800;
+  int canv_h = 600;
+  int top_x = canvs.size()*20;
+  int top_y = canvs.size()*20;
+  TString canvName = Form("c%d",int(canvs.size()));
+
+  TCanvas *c = new TCanvas(canvName,canvName,top_x,top_y,canv_w,canv_h);
+  canvs.push_back(c);
+  return c;
+}
+
 void Fitter::addObsVar(TString name, double min, double max){
+  addObsVar(name,name,"",min,max);
+}
+
+void Fitter::addObsVar(TString name, TString title, TString unit, double min, double max){
 	w->factory(Form("%s[%f,%f]",name.Data(),min,max));
 	((RooArgSet*)w->set("observables"))->add(*w->var(name));
+  w->var(name)->SetTitle(title);
+  w->var(name)->setUnit(unit);
 }
 
 void Fitter::makeObsVars(){
-  addObsVar("B0_MM",5050,6000);
-  addObsVar("gamgams_PT",0,50e3);
+  addObsVar("B0_MM",         "m(K^{#pm}#pi^{#mp}#gamma)",  "MeV",    4500,   6000);
+  addObsVar("gamgams_PT",    "p_{T}(#gamma)",  "MeV",    0,      50e3);
+  addObsVar("B0_DIRA_OWNPV", "DIRA(B_{d})",    "",       0.99999,1.);
+  addObsVar("Jpsi_MM",       "m(K#pi)",        "MeV",    800,    1000);
 }
 
 void Fitter::setUnit(TString var, TString unit){
@@ -72,7 +95,8 @@ void Fitter::makeDatasets(){
   dataSets.push_back(DataSet("MCBuJpsiX",      "MC (B_{u} #rightarrow J/#psi X)",     w, -84));
   dataSets.push_back(DataSet("MCBdJpsiKs",     "MC (B_{d} #rightarrow J/#psi K_{S})", w, -85));
   dataSets.push_back(DataSet("MCBdJpsiKstar",  "MC (B_{d} #rightarrow J/#psi K*)",    w, -86));
-  dataSets.push_back(DataSet("MCKstG",         "MC (K*#gamma)",                       w, -88));
+  dataSets.push_back(DataSet("MCKstG",         "MC (B_{d} #rightarrow K*#gamma)",     w, -88));
+  dataSets.push_back(DataSet("MCBuKstPiG",     "MC (B_{u} #rightarrow K*#pi#gamma)",  w, -90));
 
   // add them to workspace here
   for (vector<DataSet>::iterator dataIt=dataSets.begin(); dataIt!=dataSets.end(); dataIt++){
@@ -143,87 +167,6 @@ void Fitter::fillDatasets(TString fname, TString tname){
   }
 }
 
-/*
-void Fitter::readTree(TString fname, TString tname){
-
-	TFile *tf = TFile::Open(fname);
-	TTree *tree = (TTree*)tf->Get(tname);
-
-	RooDataSet *data        = new RooDataSet("data","data",RooArgSet(*(w->var("B0_MM"))));
-	RooDataSet *mc          = new RooDataSet("mc","mc",RooArgSet(*(w->var("B0_MM"))));
-	RooDataSet *mcPi0       = new RooDataSet("mcPi0","mcPi0",RooArgSet(*(w->var("B0_MM"))));
-	RooDataSet *mcJpsiX     = new RooDataSet("mcJpsiX","mcJpsiX",RooArgSet(*(w->var("B0_MM"))));
-	RooDataSet *mcBdJpsiX   = new RooDataSet("mcBdJpsiX","mcBdJpsiX",RooArgSet(*(w->var("B0_MM"))));
-	RooDataSet *mcBuJpsiX   = new RooDataSet("mcBuJpsiX","mcBuJpsiX",RooArgSet(*(w->var("B0_MM"))));
-  RooDataSet *mcJspiKs    = new RooDataSet("mcJpsiKs","mcJpsiKs",RooArgSet(*(w->var("B0_MM"))));
-  RooDataSet *mcJpsiKstar = new RooDataSet("mcJpsiKstar","mcJpsiKstar",RooArgSet(*(w->var("B0_MM"))));
-  RooDataSet *dataKst     = new RooDataSet("dataKst","dataKst",RooArgSet(*(w->var("B0_MM"))));
-  RooDataSet *mcKst       = new RooDataSet("mcKst","mcKst",RooArgSet(*(w->var("B0_MM"))));
-
-	double B0_M;
-	float bdtoutput;
-	int itype;
-	int sqrts;
-
-	tree->SetBranchAddress("B0_MM",&B0_M);
-	tree->SetBranchAddress("bdtoutput",&bdtoutput);
-	tree->SetBranchAddress("itype",&itype);
-	tree->SetBranchAddress("sqrts",&sqrts);
-
-	for (int e=0; e<tree->GetEntries(); e++){
-		tree->GetEntry(e);
-
-		if ( bdtoutput < bdtcut ) continue;
-		if ( B0_M < w->var("B0_MM")->getMin() || B0_M > w->var("B0_MM")->getMax() ) continue;
-
-		w->var("B0_MM")->setVal(B0_M);
-
-		if ( itype == -81 ) {
-			mc->add(RooArgSet(*(w->var("B0_MM"))));
-		}
-		if ( itype == -82 ) {
-			mcPi0->add(RooArgSet(*(w->var("B0_MM"))));
-		}
-		if ( itype == -83 ){
-			mcBdJpsiX->add(RooArgSet(*(w->var("B0_MM"))));
-			mcJpsiX->add(RooArgSet(*(w->var("B0_MM"))));
-		}
-		if ( itype == -84 ){
-			mcBuJpsiX->add(RooArgSet(*(w->var("B0_MM"))));
-			mcJpsiX->add(RooArgSet(*(w->var("B0_MM"))));
-		}
-    if ( itype == -85 ){
-      mcBd
-    }
-		if ( itype == 71 || itype == 81 ) {
-			data->add(RooArgSet(*(w->var("B0_MM"))));
-		}
-		if ( itype == 72 || itype == 82 ) {
-      dataKst->add(RooArgSet(*(w->var("B0_MM"))));
-    }
-	}
-
-	w->import(*data);
-	w->import(*mc);
-	w->import(*mcPi0);
-	w->import(*mcBd);
-	w->import(*mcBu);
-	w->import(*mcJpsiX);
-  w->import(*dataKst);
-
-	delete tree;
-	tf->Close();
-	delete tf;
-	delete data;
-	delete mc;
-	delete mcPi0;
-	delete mcBd;
-	delete mcBu;
-	delete mcJpsiX;
-  delete dataKst;
-}
-*/
-
 void Fitter::constructSignalPdf(){
 
 	w->factory("mean[5200,5300]");
@@ -290,7 +233,8 @@ void Fitter::defineParamSet(TString pdf){
 void Fitter::constructKstarGamMCPdf(){
   w->factory("kstg_mean[5200,5300]");
   w->factory("CBShape:kstg_cb1(B0_MM,kstg_mean,kstg_sigma_1[10,200],kstg_alpha_1[0.,1.],kstg_n_1[0.,50.])");
-  w->factory("CBShape:kstg_cb2(B0_MM,kstg_mean,kstg_sigma_2[10,200],kstg_alpha_2[-1.,0.],kstg_n_2[0.,50.])");
+  w->factory("prod::kstg_sigma_2(kstg_f_sigma[0.1,0.,1],kstg_sigma_1)");
+  w->factory("CBShape:kstg_cb2(B0_MM,kstg_mean,kstg_sigma_1,kstg_alpha_2[-1.,0.],kstg_n_2[0.,50.])");
   w->factory("SUM::kstg_sig( kstg_f[0.5,0,1]*kstg_cb1, kstg_cb2)");
 
   defineParamSet("kstg_sig");
@@ -321,104 +265,76 @@ void Fitter::constructPdfs(){
 
 void Fitter::doKstarSplot(){
 
+  // construct pdfs
   constructKstarGamMCPdf();
   constructKstarDataPdf();
 
+  // fit mc
   fit("kstg_sig","MCKstG");
   plot("B0_MM","MCKstG","kstg_sig");
-  //freeze("kstg_sig");
+
+  // freeze mc params but loosen off resolutions
+  freeze("kstg_sig");
+  w->var("kstg_sigma_1")->setConstant(false);
+  //w->var("kstg_sigma_2")->setConstant(false);
+
+  // fit the data
   fit("kstg_pdf","DataKstG");
   plot("B0_MM","DataKstG","kstg_pdf");
 
+  // now create s-weights
   RooAbsPdf *pdf = w->pdf("kstg_pdf");
   RooDataSet *data = (RooDataSet*)w->data("DataKstG");
-
   pdf->fitTo(*data,Extended());
   freeze("kstg_sig");
   freeze("kstg_bkg");
   RooStats::SPlot *sData = new RooStats::SPlot("sData","SPlot Data",*data,pdf,RooArgList(*w->var("kstg_sig_y"),*w->var("kstg_bkg_y")));
   w->import(*sData,"DataKstG_SWeights");
 
-  cout << "Check sWeights:" << endl;
-  cout << "sYield: " << w->var("kstg_sig_y") << " from sWeights: " << sData->GetYieldFromSWeight("kstg_sig_y") << endl;
-  cout << "bYield: " << w->var("kstg_bkg_y") << " from sWeights: " << sData->GetYieldFromSWeight("kstg_bkg_y") << endl;
+  // create weighted dataset of other variables
+  RooDataSet *swData = new RooDataSet(Form("%s_SWeightedProjection",data->GetName()),data->GetTitle(),data,*data->get(),0,"kstg_sig_y_sw");
+  w->import(*swData);
 
-  for (int i=0; i<10; i++){
-    cout << "   " << "bW " << sData->GetSWeight(i,"kstg_bkg_y") << " sW " << sData->GetSWeight(i,"kstg_sig_y") << " total " << sData->GetSumOfEventSWeight(i) << endl;
-  }
+  // make plots
+  vector<PlotComponent> plotComps;
+  PlotComponent pc_data( data->GetName(), "Data (K*#gamma)" );
+  pc_data.lcolor    = kBlack;
+  pc_data.mcolor    = kBlack;
+  pc_data.doption   = "LEP";
 
-  TCanvas *canv1 = new TCanvas();
-  RooPlot *mplot = w->var("B0_MM")->frame();
-  data->plotOn(mplot);
-  TObject *dLeg = mplot->getObject(mplot->numItems()-1);
-  pdf->plotOn(mplot);
-  TObject *pLeg = mplot->getObject(mplot->numItems()-1);
-  pdf->plotOn(mplot,Components(*w->pdf("kstg_sig")),LineStyle(kDashed),LineColor(kRed));
-  TObject *sLeg = mplot->getObject(mplot->numItems()-1);
-  pdf->plotOn(mplot,Components(*w->pdf("kstg_bkg")),LineStyle(kDashed),LineColor(kGreen+1));
-  TObject *bLeg = mplot->getObject(mplot->numItems()-1);
-  mplot->SetTitle("Fit to B_{d} mass");
-  mplot->GetXaxis()->SetTitleOffset(0.8);
-  mplot->GetYaxis()->SetTitleOffset(0.7);
-  TLegend *l1 = new TLegend(0.5,0.6,0.9,0.9);
-  l1->AddEntry(dLeg,"Data","LEP");
-  l1->AddEntry(pLeg,"Total PDF","L");
-  l1->AddEntry(sLeg,"Signal (2CB)","L");
-  l1->AddEntry(bLeg,"Background (EXP)","L");
-  l1->SetFillColor(0);
-  mplot->Draw();
-  l1->Draw("same");
-  canv1->Update();
-  canv1->Modified();
-  canv1->Print("plots/sweight1.pdf");
-  canv1->Print("plots/sweight1.png");
+  PlotComponent pc_pdf( pdf->GetName(), "Total PDF" );
+  pc_pdf.lcolor     = kBlue;
+  pc_pdf.lwidth     = 3;
+  pc_pdf.lstyle     = 1;
+  pc_pdf.doption    = "L";
 
-  TCanvas *canv2 = new TCanvas();
-  RooDataSet *data_swpt = new RooDataSet(data->GetName(),data->GetTitle(),data,*data->get(),0,"kstg_sig_y_sw");
-  RooPlot *splot = w->var("gamgams_PT")->frame();
-  data_swpt->plotOn(splot);
-  RooHist *dh = (RooHist*)splot->getObject(splot->numItems()-1);
-  w->data("MCKstG")->plotOn(splot,MarkerColor(kRed),LineColor(kRed));
-  RooHist *mh = (RooHist*)splot->getObject(splot->numItems()-1);
-  splot->SetTitle("#gamma p_{T} projection");
-  splot->GetXaxis()->SetTitle("#gamma p_{T}");
-  splot->GetXaxis()->SetTitleOffset(0.8);
-  splot->GetYaxis()->SetTitleOffset(0.7);
-  TLegend *l2 = new TLegend(0.5,0.6,0.9,0.9);
-  l2->AddEntry(dh,"Data (sweighted)","LEP");
-  l2->AddEntry(mh,"MC (expected)","LEP");
-  l2->SetFillColor(0);
-  splot->Draw();
-  l2->Draw("same");
-  canv2->Update();
-  canv2->Modified();
-  canv2->Print("plots/sweight2.pdf");
-  canv2->Print("plots/sweight2.png");
+  PlotComponent pc_pdf_bkg( Form("%s:kstg_bkg",pdf->GetName()), "Background (Exp)" );
+  pc_pdf_bkg.lcolor  = kGreen+1;
+  pc_pdf_bkg.lwidth  = 3;
+  pc_pdf_bkg.lstyle  = kDashed;
+  pc_pdf_bkg.doption = "L";
 
-  TCanvas *canv3 = new TCanvas();
-  cout << "here" << endl;
-  cout << dh->Integral() << " -- " << mh->Integral() << endl;
-  RooHist *residHist = new RooHist(*dh,*mh,1.,-1.,RooAbsData::SumW2);
-  cout << residHist->Integral() << endl;
-  TLegend *l3 = new TLegend(0.5,0.6,0.9,0.9);
-  l3->AddEntry(dh,"Data (sweighted) - MC","LEP");
-  residHist->SetTitle("Residual");
-  residHist->GetYaxis()->SetTitle("Data-MC");
-  residHist->GetXaxis()->SetTitle("#gamma p_{T}");
-  residHist->GetXaxis()->SetTitleOffset(0.8);
-  residHist->GetYaxis()->SetTitleOffset(0.7);
-  residHist->Draw();
-  residHist->SetDrawOption("AP");
-  TLine *l = new TLine();
-  l->SetLineColor(kRed);
-  l->SetLineStyle(kDashed);
-  l->SetLineWidth(3);
-  l->DrawLine(w->var("gamgams_PT")->getMin(),0.,w->var("gamgams_PT")->getMax(),0.);
-  l3->Draw("same");
-  canv3->Update();
-  canv3->Modified();
-  canv3->Print("plots/sweight3.pdf");
-  canv3->Print("plots/sweight3.png");
+  PlotComponent pc_pdf_sig( Form("%s:kstg_sig",pdf->GetName()), "Signal (2CB)" );
+  pc_pdf_sig.lcolor   = kRed;
+  pc_pdf_sig.lwidth   = 3;
+  pc_pdf_sig.lstyle   = kDashed;
+  pc_pdf_sig.doption  = "L";
+
+  plotComps.push_back(pc_data);
+  plotComps.push_back(pc_pdf_bkg);
+  plotComps.push_back(pc_pdf_sig);
+  plotComps.push_back(pc_pdf);
+
+  plot("B0_MM", plotComps, "sweight");
+  // end of main plot
+
+  // do splots
+  vector<TString> compDsets;
+  compDsets.push_back("MCKstG");
+
+  splot("gamgams_PT",   swData->GetName(),compDsets);
+  splot("B0_DIRA_OWNPV",swData->GetName(),compDsets);
+  splot("Jpsi_MM",      swData->GetName(),compDsets);
 
 }
 
@@ -433,30 +349,13 @@ void Fitter::freeze(TString pdf){
 	((RooArgSet*)w->set(Form("%s_params",pdf.Data())))->setAttribAll("Constant");
 }
 
-void Fitter::fit(){
-
-	// mc first
-	w->pdf("signal")->fitTo(*(w->data("mc")));
-	w->pdf("pizero")->fitTo(*(w->data("mcPi0")));
-	w->pdf("jpsix")->fitTo(*(w->data("mcJpsiX")));
-
-	((RooArgSet*)w->set("signal_params"))->setAttribAll("Constant");
-	((RooArgSet*)w->set("pizero_params"))->setAttribAll("Constant");
-	((RooArgSet*)w->set("jpsix_params"))->setAttribAll("Constant");
-
-	// now fit data
-	w->pdf("pdf")->fitTo(*(w->data("data")));
-
-	hasfit = true;
-}
-
 void Fitter::plot(TString var, TString data, TString pdf){
 
   RooPlot *plot = w->var(var)->frame(Title(data));
   plot->GetXaxis()->SetTitleOffset(0.8);
   if (w->data(data)) w->data(data)->plotOn(plot);
   if (w->pdf(pdf)) w->pdf(pdf)->plotOn(plot);
-  TCanvas *canv = new TCanvas();
+  TCanvas *canv = createCanvas();
   canv->SetBottomMargin(0.2);
   plot->Draw();
   canv->Update();
@@ -465,92 +364,103 @@ void Fitter::plot(TString var, TString data, TString pdf){
   canv->Print(Form("plots/v%s_d%s_p%s.png",var.Data(),data.Data(),pdf.Data()));
 }
 
-void Fitter::plot(){
+void Fitter::plot(TString var, vector<PlotComponent> plotComps, TString fname) {
 
-	TCanvas *canv = new TCanvas("c","c",800,600);
-	canv->Divide(2,2);
+  TCanvas *canv = createCanvas();
+  RooPlot *plot = w->var(var)->frame();
+  TString xtitle = w->var(var)->GetTitle();
+  if (TString(w->var(var)->getUnit())!=TString("")) xtitle = Form("%s (%s)",w->var(var)->GetTitle(),w->var(var)->getUnit());
+  plot->GetXaxis()->SetTitle(xtitle);
+  plot->GetXaxis()->SetTitleOffset(0.8);
+  plot->GetYaxis()->SetTitleOffset(0.7);
 
-	// signal mc
-	canv->cd(1);
-	RooPlot *mcplot = w->var("B0_MM")->frame(Title("MC: J/#psi#gamma"),Range(4750,6000));
-	w->data("mc")->plotOn(mcplot);
-	if (hasfit){
-		w->pdf("signal")->plotOn(mcplot);
-	}
-	mcplot->Draw();
+  TLegend *leg = new TLegend(0.6,0.6,0.9,0.9);
+  leg->SetFillColor(0);
 
-	// pizero mc
-	canv->cd(2);
-	RooPlot *pizeroplot = w->var("B0_MM")->frame(Title("MC: J/#psi#pi^{0}"),Range(4750,6000));
-	w->data("mcPi0")->plotOn(pizeroplot);
-	if (hasfit){
-		w->pdf("pizero")->plotOn(pizeroplot);
-	}
-	pizeroplot->Draw();
+  for (unsigned int i=0; i<plotComps.size(); i++){
+    plotComps[i].plotOn(w,plot,leg);
+  }
 
-	// psiX mc
-	canv->cd(3);
-	RooPlot *jpsixplot = w->var("B0_MM")->frame(Title("MC: J/#psiX"),Range(4750,6000));
-	w->data("mcJpsiX")->plotOn(jpsixplot);
-	if (hasfit) {
-		w->pdf("jpsix")->plotOn(jpsixplot);
-	}
-	jpsixplot->Draw();
+  plot->Draw();
+  leg->Draw("same");
+  canv->Update();
+  canv->Modified();
+  canv->Print(Form("plots/%s.pdf",fname.Data()));
+  canv->Print(Form("plots/%s.png",fname.Data()));
+}
 
-	// data
-	canv->cd(4);
-	RooPlot *dplot = w->var("B0_MM")->frame(Title("Data"));
-	//TLegend *leg = new TLegend(0.5,0.6,0.89,0.89);
-	//leg->SetFillColor(0);
-	w->data("data")->plotOn(dplot);
-	if (hasfit) {
-		/*
-		w->pdf("pdf")->plotOn(dplot,Components("background,jpsix,pizero,signal"),FillColor(kGreen-3),LineColor(kGreen-3),DrawOption("F"));
-		TObject *sigLeg = (TObject*)dplot->getObject(dplot->numItems()-1);
-		w->pdf("pdf")->plotOn(dplot,Components("background,jpsix,pizero"),FillColor(kBlue-7),LineColor(kBlue-7),DrawOption("F"));
-		TObject *pizeroLeg = (TObject*)dplot->getObject(dplot->numItems()-1);
-		w->pdf("pdf")->plotOn(dplot,Components("backgorund,jpsix"),FillColor(kRed-7),LineColor(kRed-7),DrawOption("F"));
-		TObject *jpsixLeg = (TObject*)dplot->getObject(dplot->numItems()-1);
-		w->pdf("pdf")->plotOn(dplot,Components("background"),LineColor(kOrange-2),FillColor(kOrange-2),DrawOption("F"));
-		TObject *backgroundLeg = (TObject*)dplot->getObject(dplot->numItems()-1);
-		w->data("data")->plotOn(dplot);
-		TObject *dataLeg = (TObject*)dplot->getObject(dplot->numItems()-1);
-		w->pdf("pdf")->plotOn(dplot,DrawOption("L"));
-		TObject *pdfLeg = (TObject*)dplot->getObject(dplot->numItems()-1);
+void Fitter::splot(TString var, TString data){
+  vector<TString> temp;
+  splot(var, data, temp);
+}
 
-		leg->AddEntry(dataLeg,"Data (3fb^{-1})","LEP");
-		leg->AddEntry(sigLeg,"J/#psi#gamma","LF");
-		leg->AddEntry(pizeroLeg,"J/#psi#pi^{0}","LF");
-		leg->AddEntry(jpsixLeg,"J/#psiX","LF");
-		leg->AddEntry(backgroundLeg,"Combinatorial","LF");
-		leg->AddEntry(pdfLeg,"Total PDF","L");
-		*/
-	}
-	//dplot->Draw();
-	//leg->Draw("same");
+void Fitter::splot(TString var, TString data, vector<TString> compDsets) {
 
-	canv->Update();
-	canv->Modified();
-	canv->Print("plots/datasets.pdf");
-	delete canv;
+  if (!w->data(data)) {
+    cerr << "ERROR -- Fitter::splot() -- no sweighted data exists" << endl;
+    exit(1);
+  }
+  TCanvas *canv = createCanvas();
 
-	TCanvas *canvAlone = new TCanvas();
-	dplot->Draw();
-	//leg->Draw("same");
-	canvAlone->Update();
-	canvAlone->Modified();
-	canvAlone->Print("plots/datafit.pdf");
-	delete canvAlone;
+  TLegend *leg = new TLegend(0.6,0.6,0.9,0.9);
+  leg->SetFillColor(0);
+  RooPlot *splot = w->var(var)->frame();
+  splot->SetTitle(Form("%s projection",w->var(var)->GetTitle()));
+  splot->GetXaxis()->SetTitleOffset(0.8);
+  splot->GetYaxis()->SetTitleOffset(0.7);
+  TString xtitle = w->var(var)->GetTitle();
+  if (TString(w->var(var)->getUnit())!=TString("")) xtitle = Form("%s (%s)",w->var(var)->GetTitle(),w->var(var)->getUnit());
+  splot->GetXaxis()->SetTitle(w->var(var)->GetTitle());
 
-	TCanvas *canvLog = new TCanvas();
-	dplot->GetYaxis()->SetRangeUser(0.1,500);
-	dplot->Draw();
-	//leg->Draw("same");
-	canvLog->SetLogy();
-	canvLog->Update();
-	canvLog->Modified();
-	canvLog->Print("plots/datafit_log.pdf");
-	delete canvLog;
+  w->data(data)->plotOn(splot);
+  RooHist *dh = (RooHist*)splot->getObject(splot->numItems()-1);
+  leg->AddEntry(dh,w->data(data)->GetTitle(),"LEP");
+
+  vector<RooHist*> compHists;
+  for (unsigned int i=0; i<compDsets.size(); i++){
+    TString dset = compDsets[i];
+    w->data(dset)->plotOn(splot,MarkerColor(colors[i]),LineColor(colors[i]),Rescale(w->data(data)->sumEntries()/w->data(dset)->sumEntries()));
+    RooHist *sh = (RooHist*)splot->getObject(splot->numItems()-1);
+    leg->AddEntry(sh,w->data(dset)->GetTitle(),"LEP");
+    compHists.push_back(sh);
+  }
+
+  splot->Draw();
+  leg->Draw("same");
+  canv->Update();
+  canv->Modified();
+  canv->Print(Form("plots/splot_v%s.pdf",var.Data()));
+  canv->Print(Form("plots/splot_v%s.png",var.Data()));
+
+  TCanvas *canvResid = createCanvas();
+  for (unsigned int i=0; i<compHists.size(); i++){
+    RooHist *residHist = new RooHist(*dh,*compHists[i],1.,-1.,RooAbsData::SumW2);
+    residHist->SetTitle("Residual");
+    residHist->GetYaxis()->SetTitle("Data-MC");
+    residHist->GetXaxis()->SetTitle(xtitle);
+    residHist->GetXaxis()->SetTitleOffset(0.8);
+    residHist->GetYaxis()->SetTitleOffset(0.7);
+    residHist->SetLineColor(colors[i]);
+    residHist->SetMarkerColor(colors[i]);
+    if (i==0) {
+      residHist->Draw();
+    }
+    else {
+      residHist->Draw("same");
+    }
+    residHist->SetDrawOption("AP");
+    canvResid->Update();
+    canvResid->Modified();
+  }
+  TLine *l = new TLine();
+  l->SetLineColor(kBlack);
+  l->SetLineStyle(kDashed);
+  l->SetLineWidth(3);
+  l->DrawLine(w->var(var)->getMin(),0.,w->var(var)->getMax(),0.);
+  canvResid->Update();
+  canvResid->Modified();
+  canvResid->Print(Form("plots/splot_resid_v%s.pdf",var.Data()));
+  canvResid->Print(Form("plots/splot_resid_v%s.png",var.Data()));
 
 }
 

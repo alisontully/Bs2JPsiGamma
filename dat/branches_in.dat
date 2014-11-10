@@ -160,3 +160,15 @@ Int_t           nMuonTracks                                  0
 Int_t           nPVs                                         0
 UInt_t          runNumber                                    0
 ULong64_t       totCandidates                                0
+Double_t        Kplus_PIDK                                   0
+Double_t        Kplus_PX                                     0
+Double_t        Kplus_PY                                     0
+Double_t        Kplus_PZ                                     0
+Double_t        Kplus_PE                                     0
+Double_t        Kplus_P                                      0
+Double_t        piminus_PIDK                                 0
+Double_t        piminus_PX                                   0
+Double_t        piminus_PY                                   0
+Double_t        piminus_PZ                                   0
+Double_t        piminus_PE                                   0
+Double_t        piminus_P                                    0
