@@ -2,6 +2,7 @@
 
 from optparse import OptionParser
 parser = OptionParser()
+parser.add_option("-i","--readDatfile", default=[], action="append", help="Read branch info from pre-written dat file listing branches. Can parse multiple times")
 parser.add_option("-d","--datafile",default=[],action="append",help="File to dump branches from. Can parse multiple times. Use form filename:treename")
 parser.add_option("-m","--mcfile",default=[],action="append",help="File to dump branches from. Can parse multiple times. Use form filename:treename")
 (options,args) = parser.parse_args()
@@ -22,6 +23,20 @@ def getInfoTree(tree,ityp):
 			varInfo[leaf.GetName()] = [leaf.GetTypeName(),0]
 		else:
 			varInfo[leaf.GetName()] = [leaf.GetTypeName(),ityp]
+
+def getInfoFromDatFile():
+  for fil in options.readDatfile:
+    f = open(fil)
+    for line in f.readlines():
+      if line.startswith('#'): continue
+      if line=='\n': continue
+      if line.startswith(' '): continue
+      line = line.strip('\n')
+      typeName = line.split()[0]
+      varName  = line.split()[1]
+      ityp     = int(line.split()[2])
+      varInfo[varName] = [typeName, ityp]
+    f.close()
 
 def writeHeader(varKeys,varInfo):
 
@@ -175,6 +190,9 @@ for f, t, typ in all_files:
 	tf = r.TFile(f)
 	tree = tf.Get(t)
 	getInfoTree(tree,typ)
+
+if len(options.readDatfile)>0:
+  getInfoFromDatFile()
 
 varKeys = varInfo.keys()
 varKeys.sort()

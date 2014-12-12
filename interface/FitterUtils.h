@@ -40,6 +40,28 @@ class DataSet {
     RooWorkspace *w;
 
     void addType(int type) { itypes.push_back(type); }
+
+    // specific cuts for this dataset
+    void addRequirement(TString name, double low, double high) {
+      requirements_d[name] = std::make_pair(low,high);
+    }
+    void addRequirement(TString name, float low, float high) {
+      requirements_f[name] = std::make_pair(low,high);
+    }
+    void addRequirement(TString name, int low, int high) {
+      requirements_i[name] = std::make_pair(low,high);
+    }
+    void addRequirement(TString name, int val) {
+      requirements_i[name] = std::make_pair(val,val);
+    }
+    void addRequirement(TString name, bool val) {
+      requirements_b[name] = val;
+    }
+    //
+    std::map<TString,std::pair<double, double> > requirements_d;
+    std::map<TString,std::pair<float, float> > requirements_f;
+    std::map<TString,std::pair<int, int> > requirements_i;
+    std::map<TString,bool> requirements_b;
 };
 
 class PlotComponent {
@@ -61,6 +83,10 @@ class PlotComponent {
     int fcolor;
     int fstyle;
     TString doption;
+
+    void setDefaultDataStyle();
+    void setDashedLine(int color);
+    void setSolidLine(int color);
 
 };
 

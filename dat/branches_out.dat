@@ -52,6 +52,7 @@ Double_t        eminus_PT                                    0
 Double_t        eminus_PX                                    0
 Double_t        eminus_PY                                    0
 Double_t        eminus_PZ                                    0
+Int_t           eminus_TRACK_Type                            0
 Double_t        eplus_CosTheta                               0
 Double_t        eplus_M                                      0
 Double_t        eplus_MINIP                                  0
@@ -62,6 +63,7 @@ Double_t        eplus_PT                                     0
 Double_t        eplus_PX                                     0
 Double_t        eplus_PY                                     0
 Double_t        eplus_PZ                                     0
+Int_t           eplus_TRACK_Type                             0
 ULong64_t       eventNumber                                  0
 Int_t           gamgams_BKGCAT                              -1
 Double_t        gamgams_CosTheta                             0

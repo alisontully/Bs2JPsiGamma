@@ -35,14 +35,21 @@ bool Trigger::AnalyseEvent(Looper *l){
 
 		// L0
 		if ( ! *l->B0_L0HadronDecision_TOS 								  &&
+         ! *l->B0_L0ElectronDecision_TOS                &&
 				 ! *l->B0_L0Global_TIS                            ) return false;
 
 		// HLT1
-		if ( ! *l->B0_Hlt1TrackAllL0Decision_TOS              ) return false;
+		if ( ! *l->B0_Hlt1TrackAllL0Decision_TOS            &&
+         ! *l->B0_Hlt1TrackPhotonDecision_TOS             ) return false;
 
 		// HLT2
 		if ( ! *l->B0_Hlt2Topo2BodyBBDTDecision_TOS         &&
-				 ! *l->B0_Hlt2Topo3BodyBBDTDecision_TOS           ) return false;
+				 ! *l->B0_Hlt2Topo3BodyBBDTDecision_TOS         &&
+				 ! *l->B0_Hlt2Topo4BodyBBDTDecision_TOS         &&
+         ! *l->B0_Hlt2TopoE2BodyBBDTDecision_TOS        &&
+         ! *l->B0_Hlt2TopoE3BodyBBDTDecision_TOS        &&
+         ! *l->B0_Hlt2TopoE4BodyBBDTDecision_TOS        &&
+         ! *l->B0_Hlt2RadiativeTopoPhotonDecision_TOS     ) return false;
 	}
 	// all other JpsiGamma
 	else {

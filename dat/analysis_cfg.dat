@@ -21,8 +21,8 @@ analysers=TruthMatching,Trigger,PreSelection,BDTReader
 #itype=-85   name=MCBdJpsiKs           fname=nTuples/Bd2JpsiKs_pi0pi0_MC.root             tname=JpsiGamma_Tuple/DecayTree
 #itype=-86   name=MCBdJpsiKstar        fname=nTuples/BuJpsiKst_Kpi0_MC.root               tname=JpsiGamma_Tuple/DecayTree
 itype=-88   name=MCBdKstarGamma       fname=nTuples/Bd2KstGamma_MC.root                  tname=JpsiGamma_Tuple/DecayTree
-itype=-89   name=MCBuKpPimPiz         fname=nTuples/Bu2KpPimPiz_MC.root                  tname=JpsiGamma_Tuple/DecayTree
-itype=-90   name=MCBuKstPiGamma       fname=nTuples/Bu2KstPiGam_MC.root                  tname=JpsiGamma_Tuple/DecayTree
+#itype=-89   name=MCBuKpPimPiz         fname=nTuples/Bu2KpPimPiz_MC.root                  tname=JpsiGamma_Tuple/DecayTree
+#itype=-90   name=MCBuKstPiGamma       fname=nTuples/Bu2KstPiGam_MC.root                  tname=JpsiGamma_Tuple/DecayTree
 #itype=-89   name=MCBdKPiGamma         fname=nTuples/Bd2KPiGamma_MC.root                  tname=JpsiGamma_Tuple/DecayTree
 #itype=-90   name=MCBdKst1410Gamma     fname=nTuples/Bd2Kst1410Gamma_MC.root              tname=JpsiGamma_Tuple/DecayTree
 #itype=-91   name=MCBd2KpPimPiz        fname=nTuples/Bd2KpPimPiz_MC.root                  tname=JpsiGamma_Tuple/DecayTree

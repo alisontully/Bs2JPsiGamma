@@ -126,3 +126,26 @@ void PlotComponent::plotOn(RooWorkspace *w, RooPlot *plot, TLegend *leg){
   }
 }
 
+void PlotComponent::setDefaultDataStyle(){
+  lcolor = kBlack;
+  mcolor = kBlack;
+  doption = "LEP";
+  // the rest are already defaults
+}
+
+void PlotComponent::setDashedLine(int color){
+  lcolor = color;
+  lwidth = 3;
+  lstyle = kDashed;
+  doption = "L";
+  // the rest are already defaults
+}
+
+void PlotComponent::setSolidLine(int color){
+  lcolor = color;
+  lwidth = 3;
+  lstyle = 1;
+  doption = "L";
+  // the rest are already defaults
+}
+
