@@ -49,15 +49,9 @@ void BDTTrainer::Init(Looper *l){
 	varNames.push_back("B0_ENDVERTEX_CHI2");
 	varNames.push_back("B0_ISOLATION_BDT1_highq2");
 	varNames.push_back("B0_TAU");
-	//varNames.push_back("B0_FD_CHI2");
-
-	//varNames.push_back("Jpsi_PT");
-	//varNames.push_back("Jpsi_MINIPCHI2");
-
 	varNames.push_back("gamgams_PT");
-	//varNames.push_back("gamgams_DIRA_OWNPV");
-	//varNames.push_back("gamgams_MINIPCHI2");
-	//varNames.push_back("gamgams_ENDVERTEX_CHI2");
+  varNames.push_back("muplus_CosTheta");
+  varNames.push_back("muminus_CosTheta");
 
 	// add variables to factories and inialise map
 	for (vector<TString>::iterator var=varNames.begin(); var!=varNames.end(); var++){
@@ -99,15 +93,9 @@ bool BDTTrainer::AnalyseEvent(Looper *l){
 	varMap["B0_ENDVERTEX_CHI2"]            = *l->B0_ENDVERTEX_CHI2;
 	varMap["B0_ISOLATION_BDT1_highq2"]     = *l->B0_ISOLATION_BDT1_highq2;
 	varMap["B0_TAU"]                       = *l->B0_TAU;
-	//varMap["B0_FD_CHI2"]                   = *l->B0_FD_CHI2;
-
-	//varMap["Jpsi_PT"]                      = *l->Jpsi_PT;
-	//varMap["Jpsi_MINIPCHI2"]               = *l->Jpsi_MINIPCHI2;
-
 	varMap["gamgams_PT"]                   = *l->gamgams_PT;
-	//varMap["gamgams_DIRA_OWNPV"]           = *l->gamgams_DIRA_OWNPV;
-	//varMap["gamgams_MINIPCHI2"]            = *l->gamgams_MINIPCHI2;
-	//varMap["gamgams_ENDVERTEX_CHI2"]       = *l->gamgams_ENDVERTEX_CHI2;
+  varMap["muplus_CosTheta"]              = *l->muplus_CosTheta;
+  varMap["muminus_CosTheta"]             = *l->muminus_CosTheta;
 
 	// now put the variable values in a nice vector (in the right order!!)
 	assert(varNames.size()==varMap.size());

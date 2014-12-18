@@ -35,8 +35,9 @@ bool TruthMatching::AnalyseEvent(Looper *l){
 		if ( l->itype==-82 && *l->B0_BKGCAT > 55 ) return false;  // JpsiPiZero
 		if ( l->itype==-83 && *l->B0_BKGCAT > 50 ) return false; // BdJpsiX
 	  if ( l->itype==-84 && *l->B0_BKGCAT > 50 ) return false; // BuJpsiX
-	  if ( l->itype==-85 && *l->B0_BKGCAT > 50 ) return false; // BdJpsiKs_pi0pi0
-    if ( l->itype==-86 && *l->B0_BKGCAT > 50 ) return false; // BdJpsiKstar_Kpi0
+	  if ( l->itype==-85 && *l->B0_BKGCAT > 50 ) return false; // BdJpsiKs_pizpiz
+    if ( l->itype==-86 && *l->B0_BKGCAT > 50 ) return false; // BdJpsiKst
+    if ( l->itype==-87 && *l->B0_BKGCAT > 50 ) return false; // BdJpsiRho
 	  if ( l->itype==-88 && *l->B0_BKGCAT > 0  ) return false; // BdKstGamma
 	}
 	// Data only

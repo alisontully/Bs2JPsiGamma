@@ -21,7 +21,7 @@ if not opts.interactive: r.gROOT.SetBatch()
 sw = r.TStopwatch()
 sw.Start()
 
-fitter = getattr(r,opts.type)("w",opts.verbose,opts.debug)
+fitter = getattr(r,opts.type)("w",opts.type,opts.verbose,opts.debug)
 fitter.addObsVars()
 fitter.addCuts()
 fitter.addDatasets()

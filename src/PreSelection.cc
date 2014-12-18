@@ -32,7 +32,7 @@ bool PreSelection::AnalyseEvent(Looper *l){
 
 	// do physics here e.g.:
 
-	if ( *l->B0_DIRA_OWNPV < 0.99999 ) return false;
+	if ( *l->B0_DIRA_OWNPV < 0.9999 ) return false;
 	if ( *l->B0_PT < 2000 ) return false;
 	if ( *l->gamgams_PT < 1000 ) return false;
 	if ( *l->B0_TAU < 0 ) return false;

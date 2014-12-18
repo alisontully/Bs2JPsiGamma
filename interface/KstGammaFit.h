@@ -7,7 +7,7 @@ class KstGammaFit : public FitterBase {
 
   public:
 
-    KstGammaFit(TString wsname="w", bool verbose=false, bool debug=false);
+    KstGammaFit(TString wsname="w", TString name="KstGammaFit",bool verbose=false, bool debug=false);
     ~KstGammaFit();
 
     void addObsVars();
@@ -19,6 +19,8 @@ class KstGammaFit : public FitterBase {
 
   private:
 
+    void makeDataPlotLL();
+    void makeDataPlotDD();
     void makeDataPlot();
 
 

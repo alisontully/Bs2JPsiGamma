@@ -19,8 +19,10 @@ class FitterBase {
 
   public:
 
-    FitterBase(TString wsname="w", bool _verbose=false, bool _debug=false);
+    FitterBase(TString wsname="w", TString name="Fitter", bool _verbose=false, bool _debug=false);
     virtual ~FitterBase() = 0;
+
+    void loadCachedWorkspace(TString fname);
 
     void addObsVar(TString name, double min, double max);
     void addObsVar(TString name, TString title, TString unit, double min, double max);
@@ -53,6 +55,7 @@ class FitterBase {
     void setDebug(bool val=true){ debug=val; }
 
     RooWorkspace *w;
+    TString fitterName;
 
     // these should be implemented by the inherited fitter
     // can of course be implemened and do nothing
@@ -84,13 +87,19 @@ class FitterBase {
     TCanvas* createCanvas(int canv_w=800, int canv_h=600);
 
     void plot(TString var, TString data, TString pdf="", TString title="");
-    void plot(TString var, std::vector<PlotComponent> plotComps, TString fname);
+    void plot(TString var, std::vector<PlotComponent> plotComps, TString fname, const RooArgSet *params=NULL);
 
-    void splot(TString var, TString data, int bins=-1);
-    void splot(TString var, TString data, std::vector<TString> compDsets, int bins=-1);
+    void splot(TString var, TString data, TString title="", int bins=-1);
+    void splot(TString var, TString data, std::vector<TString> compDsets, TString title="", int bins=-1);
 
     void storeSPlotProjection(RooHist *rh, TString name);
     void storeSPlotRatio(RooHist *dh, RooHist *sh, TString name);
+
+    // plot opts
+    double getPBoxX() { return pBoxX; }
+    void   setPBoxX(double val) { pBoxX = val; }
+    void   setDrawLog(bool val=true) { pDrawLog = val; }
+    void   setTitle(TString title) { pTitle = title; }
 
     bool verbose;
     bool debug;
@@ -114,6 +123,11 @@ class FitterBase {
     bool passesRequirements(DataSet &dset);
 
     void printEntry(int entry);
+
+    // plot opts
+    double  pBoxX;
+    bool    pDrawLog;
+    TString pTitle;
 };
 
 #endif

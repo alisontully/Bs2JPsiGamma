@@ -82,6 +82,7 @@ class PlotComponent {
     int mstyle;
     int fcolor;
     int fstyle;
+    int binning;
     TString doption;
 
     void setDefaultDataStyle();

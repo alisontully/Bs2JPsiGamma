@@ -12,9 +12,15 @@
 ####################################################################################################
 
 branchdef=AnalysisBranches
-analysers=PreSelection
+analysers=TruthMatching,Trigger,PreSelection
 
-#itype=-81  	name=MC2012 					fname=nTuples/Bs2JpsiGamma_MC12_29Sep.root        		tname=JpsiGamma_Tuple/DecayTree
-#itype=81  	name=Data2012 				fname=nTuples/Bs2JpsiGamma_data_29Sep.root 						tname=JpsiGamma_Tuple/DecayTree
-itype=82    name=KstarGamma2012   fname=nTuples/Bd2KstGamma.root  											tname=JpsiGamma_Tuple/DecayTree
-
+itype=-81   name=Bs2JpsiGamma         fname=nTuples/Bs2JpsiGamma_MC.root            tname=JpsiGamma_Tuple/DecayTree
+itype=-82   name=Bd2JpsiPiz           fname=nTuples/Bd2JpsiPiz.root                 tname=JpsiGamma_Tuple/DecayTree
+itype=-85   name=Bd2JpsiKs            fname=nTuples/Bd2JpsiKs_pizpiz.root           tname=JpsiGamma_Tuple/DecayTree
+itype=-86   name=Bd2JpsiKst           fname=nTuples/Bu2JpsiKst.root                 tname=JpsiGamma_Tuple/DecayTree
+itype=-87   name=Bd2JpsiRho           fname=nTuples/Bu2JpsiRho.root                 tname=JpsiGamma_Tuple/DecayTree
+itype=-88   name=Bd2KstGamma          fname=nTuples/Bd2KstGamma_MC.root             tname=JpsiGamma_Tuple/DecayTree
+itype=71    name=Data2011             fname=nTuples/Bs2JpsiGamma_2011.root          tname=JpsiGamma_Tuple/DecayTree
+itype=81    name=Data2012             fname=nTuples/Bs2JpsiGamma_2012.root          tname=JpsiGamma_Tuple/DecayTree
+itype=72    name=DataKstG2011         fname=nTuples/Bd2KstGamma_2011.root           tname=JpsiGamma_Tuple/DecayTree
+itype=82    name=DataKstG2012         fname=nTuples/Bd2KstGamma_2012.root           tname=JpsiGamma_Tuple/DecayTree

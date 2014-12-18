@@ -59,6 +59,7 @@ PlotComponent::PlotComponent(TString _name, TString _title):
   mstyle(0),
   fcolor(0),
   fstyle(0),
+  binning(-1),
   doption("L")
 {}
 
@@ -72,6 +73,7 @@ PlotComponent::PlotComponent(TString _name, TString _title, int _lcolor):
   mstyle(0),
   fcolor(0),
   fstyle(0),
+  binning(-1),
   doption("L")
 {}
 
@@ -85,6 +87,7 @@ PlotComponent::PlotComponent(TString _name, TString _title, int _lcolor, int _ls
   mstyle(0),
   fcolor(0),
   fstyle(0),
+  binning(-1),
   doption("L")
 {}
 
@@ -99,13 +102,18 @@ void PlotComponent::plotOn(RooWorkspace *w, RooPlot *plot, TLegend *leg){
     comp.Remove(0,comp.First(":")+1);
   }
 
+  // set binning to default if not requested
+  if ( binning == -1 ) {
+    binning = plot->getPlotVar()->getBins();
+  }
+
   // check if dset
   if (w->data(name)) {
     if (mstyle > 0) {
-      w->data(name)->plotOn(plot,LineColor(lcolor),MarkerColor(mcolor),MarkerStyle(mstyle));
+      w->data(name)->plotOn(plot,Binning(binning),LineColor(lcolor),MarkerColor(mcolor),MarkerStyle(mstyle));
     }
     else {
-      w->data(name)->plotOn(plot,LineColor(lcolor),MarkerColor(mcolor));
+      w->data(name)->plotOn(plot,Binning(binning),LineColor(lcolor),MarkerColor(mcolor));
     }
   }
 

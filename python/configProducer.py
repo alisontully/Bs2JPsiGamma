@@ -1,4 +1,7 @@
+#!vim noexpandtab
 import ROOT as r
+import os
+import sys
 
 class infoObj:
 	def __init__(self):
@@ -31,6 +34,7 @@ class configProducer:
 		for line in f.readlines():
 			if line.startswith('#'): continue
 			if line=='\n': continue
+			if line==' ': continue
 			if len(line.strip())==0: continue
 			if len(line.split())==0 and not (line.startswith('analysers') or line.startswith('branchdef')): continue
 			itype = -999
@@ -70,6 +74,7 @@ class configProducer:
 			sys.exit('ERROR in datfile - Cannot run with no analysers!')
 		if not self.branchdef:
 			sys.exit('ERROR in datfile - Must specify a branchdef class!')
+		f.close()
 
 	def printCfg(self):
 
@@ -82,6 +87,17 @@ class configProducer:
 		for analyser in self.analysers:
 			print '%-30s'%'', analyser.name
 
+	def checkFile(self,fname,tname):
+		if not os.path.isfile(fname) and not 'eoslhcb' in fname: # get out for eos files
+			sys.exit('** ERROR ** -- The requested file (%s) does not exist'%fname)
+		if not fname.endswith('.root'):
+			sys.exit('** ERROR ** -- The requested file (%s) does not appear to be a root file'%fname)
+
+		tf = r.TFile.Open(fname)
+		if not tf.Get(tname):
+			sys.exit('** ERROR *** -- The tree (%s) was not found in the file (%s)'%(tname,fname))
+		tf.Close()
+
 	def parseDatfile(self):
 
 		for itype, flist in self.cfgDict.items():
@@ -91,7 +107,11 @@ class configProducer:
 			tree = r.TChain(name)
 
 			for f in flist:
+				self.checkFile(f.fname,f.tname)
 				tree.AddFile(f.fname+'/'+f.tname)
+				if self.verbose:
+					print '%-30s'%'configProducer::parseDatfile()', 'Appended file', f.fname
+
 				if name != f.name:
 					sys.exit('ERROR -- If the itype is the same for two lines in the datfile, the name must be the same also')
 

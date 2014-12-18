@@ -28,9 +28,13 @@ using namespace std;
 using namespace RooFit;
 using namespace TMath;
 
-FitterBase::FitterBase(TString wsname, bool _verbose, bool _debug):
+FitterBase::FitterBase(TString wsname, TString name, bool _verbose, bool _debug):
+  fitterName(name),
   verbose(_verbose),
-  debug(_debug)
+  debug(_debug),
+  pBoxX(0.22),
+  pDrawLog(false),
+  pTitle("")
 {
   if ( !debug ) {
     RooMsgService::instance().setGlobalKillBelow(FATAL);
@@ -44,9 +48,23 @@ FitterBase::FitterBase(TString wsname, bool _verbose, bool _debug):
   colors.push_back(kRed);
   colors.push_back(kBlue);
   colors.push_back(kGreen+1);
+  system(Form("mkdir -p plots/%s/png",fitterName.Data()));
+  system(Form("mkdir -p plots/%s/pdf",fitterName.Data()));
+  system(Form("mkdir -p plots/%s/C",fitterName.Data()));
 }
 
-FitterBase::~FitterBase(){}
+FitterBase::~FitterBase(){
+  delete w;
+}
+
+void FitterBase::loadCachedWorkspace(TString fname){
+  // get name of and then delete old workspace
+  TString wsname = w->GetName();
+  delete w;
+  // now load the cached version in its place
+  TFile *cacheFile = TFile::Open(fname);
+  w = (RooWorkspace*)cacheFile->Get(wsname);
+}
 
 void FitterBase::addObsVar(TString name, double min, double max){
   addObsVar(name,name,"",min,max);
@@ -185,7 +203,7 @@ void FitterBase::fillDatasets(TString fname, TString tname){
 		tree->GetEntry(e);
 
     // print occasional entries in debug mode
-    if ( debug && e%100==0 ) {
+    if ( debug && e%10000==0 ) {
       printEntry(e);
     }
 
@@ -243,6 +261,10 @@ void FitterBase::print(TString line, bool blank){
 }
 
 void FitterBase::defineParamSet(TString pdf){
+  if ( ! w->pdf(pdf) ) {
+    cout << "ERROR -- No valid pdf named " << pdf << " in workspace" << endl;
+    exit(1);
+  }
   RooArgSet *argset = w->pdf(pdf)->getParameters(*w->set("observables"));
   w->defineSet(Form("%s_params",pdf.Data()),*argset);
   delete argset;
@@ -332,17 +354,18 @@ void FitterBase::plot(TString var, TString data, TString pdf, TString title){
   canv->SetBottomMargin(0.2);
   plot->Draw();
   leg->Draw("same");
-  text->Draw("same");
+  if ( title != "" ) text->Draw("same");
   canv->Update();
   canv->Modified();
-  canv->Print(Form("plots/v%s_d%s_p%s.pdf",var.Data(),data.Data(),pdf.Data()));
-  canv->Print(Form("plots/v%s_d%s_p%s.png",var.Data(),data.Data(),pdf.Data()));
+  canv->Print(Form("plots/%s/pdf/v%s_d%s_p%s.pdf",fitterName.Data(),var.Data(),data.Data(),pdf.Data()));
+  canv->Print(Form("plots/%s/png/v%s_d%s_p%s.png",fitterName.Data(),var.Data(),data.Data(),pdf.Data()));
+  canv->Print(Form("plots/%s/C/v%s_d%s_p%s.C",    fitterName.Data(),var.Data(),data.Data(),pdf.Data()));
 
   delete text;
   delete leg;
 }
 
-void FitterBase::plot(TString var, vector<PlotComponent> plotComps, TString fname) {
+void FitterBase::plot(TString var, vector<PlotComponent> plotComps, TString fname, const RooArgSet *params) {
 
   print("Plotting following components in variable: "+var);
   for (unsigned int i=0; i<plotComps.size(); i++){
@@ -350,14 +373,21 @@ void FitterBase::plot(TString var, vector<PlotComponent> plotComps, TString fnam
   }
 
   TCanvas *canv = createCanvas();
+  canv->SetLeftMargin(0.18);
   RooPlot *plot = w->var(var)->frame();
   TString xtitle = w->var(var)->GetTitle();
   if (TString(w->var(var)->getUnit())!=TString("")) xtitle = Form("%s (%s)",w->var(var)->GetTitle(),w->var(var)->getUnit());
   plot->GetXaxis()->SetTitle(xtitle);
   plot->GetXaxis()->SetTitleOffset(0.8);
-  plot->GetYaxis()->SetTitleOffset(0.7);
+  plot->GetYaxis()->SetTitleOffset(0.8);
 
-  TLegend *leg = new TLegend(0.6,0.6,0.9,0.9);
+  TLegend *leg;
+  if ( plotComps.size()<7 ) {
+    leg = new TLegend(0.6,0.6,0.9,0.9);
+  }
+  else {
+    leg = new TLegend(0.6,0.5,0.9,0.9);
+  }
   leg->SetFillColor(0);
 
   for (unsigned int i=0; i<plotComps.size(); i++){
@@ -366,10 +396,64 @@ void FitterBase::plot(TString var, vector<PlotComponent> plotComps, TString fnam
 
   plot->Draw();
   leg->Draw("same");
+
+  // if requested plot title
+  if ( pTitle != "" ) {
+    TPaveText *text = new TPaveText(0.22,0.8,0.45,0.9,"ndc");
+    text->SetFillColor(0);
+    text->SetShadowColor(0);
+    text->SetLineColor(0);
+    text->AddText(pTitle);
+    text->Draw("same");
+  }
+
+  // if requested also plot parameter values
+  if (params) {
+    double top = 0.9;
+    if ( pTitle != "" ) {
+      top = 0.8;
+    }
+    double bottom = top-(0.05*params->getSize());
+    TPaveText *pNames = new TPaveText(pBoxX,bottom,pBoxX+0.08,top,"ndc");
+    TPaveText *pVals = new TPaveText(pBoxX+0.08,bottom,pBoxX+0.2,top,"ndc");
+    pNames->SetFillColor(0);
+    pNames->SetShadowColor(0);
+    pNames->SetLineColor(0);
+    pNames->SetTextSize(0.03);
+    pNames->SetTextAlign(11);
+    pVals->SetFillColor(0);
+    pVals->SetShadowColor(0);
+    pVals->SetLineColor(0);
+    pVals->SetTextSize(0.03);
+    pVals->SetTextAlign(11);
+    RooRealVar *parg;
+    TIterator *iter = params->createIterator();
+    while ((parg = (RooRealVar*)iter->Next())){
+	    pNames->AddText(Form("%-10s",parg->GetTitle()));
+      pVals->AddText(Form("= %4.2f #pm %4.2f",parg->getVal(),parg->getError()));
+    }
+    pNames->Draw("same");
+    pVals->Draw("same");
+  }
+
   canv->Update();
   canv->Modified();
-  canv->Print(Form("plots/%s.pdf",fname.Data()));
-  canv->Print(Form("plots/%s.png",fname.Data()));
+  canv->Print(Form("plots/%s/pdf/%s.pdf",fitterName.Data(),fname.Data()));
+  canv->Print(Form("plots/%s/png/%s.png",fitterName.Data(),fname.Data()));
+  canv->Print(Form("plots/%s/C/%s.C",    fitterName.Data(),fname.Data()));
+
+  if ( pDrawLog ) {
+    TCanvas *canvLog = createCanvas();
+    canvLog->SetLeftMargin(0.18);
+    plot->GetYaxis()->SetRangeUser(1.,plot->GetMaximum()*2);
+    plot->Draw();
+    canvLog->SetLogy();
+    canvLog->Update();
+    canvLog->Modified();
+    canvLog->Print(Form("plots/%s/pdf/%s_log.pdf",fitterName.Data(),fname.Data()));
+    canvLog->Print(Form("plots/%s/png/%s_log.png",fitterName.Data(),fname.Data()));
+    canvLog->Print(Form("plots/%s/C/%s_log.C",    fitterName.Data(),fname.Data()));
+  }
 }
 
 void FitterBase::fit(TString pdf, TString data) {
@@ -449,7 +533,11 @@ void FitterBase::sproject(TString data_name, TString var_name) {
 }
 
 void FitterBase::freeze(TString pdf){
-	((RooArgSet*)w->set(Form("%s_params",pdf.Data())))->setAttribAll("Constant");
+	if ( ! w->set(Form("%s_params",pdf.Data())) ) {
+    cout << "ERROR -- No valid set named " << pdf << "_params in workspace" << endl;
+    exit(1);
+  }
+  ((RooArgSet*)w->set(Form("%s_params",pdf.Data())))->setAttribAll("Constant");
   if ( verbose || debug ) {
     print("Frozen parameter values of pdf: "+pdf);
     if ( debug ) {
@@ -492,12 +580,12 @@ double FitterBase::integral(TString pdf, TString var, TString scale, double low,
   return value;
 }
 
-void FitterBase::splot(TString var, TString data, int bins){
+void FitterBase::splot(TString var, TString data, TString title, int bins){
   vector<TString> temp;
-  splot(var, data, temp, bins);
+  splot(var, data, temp, title, bins);
 }
 
-void FitterBase::splot(TString var, TString data, vector<TString> compDsets, int bins) {
+void FitterBase::splot(TString var, TString data, vector<TString> compDsets, TString title, int bins) {
 
   if (!w->data(data)) {
     cerr << "ERROR -- FitterBase::splot() -- no sweighted data exists" << endl;
@@ -507,6 +595,12 @@ void FitterBase::splot(TString var, TString data, vector<TString> compDsets, int
     bins = w->var(var)->getBins();
   }
   TCanvas *canv = createCanvas();
+
+  TPaveText *text = new TPaveText(0.15,0.8,0.4,0.9,"ndc");
+  text->SetFillColor(0);
+  text->SetShadowColor(0);
+  text->SetLineColor(0);
+  text->AddText(title);
 
   TLegend *leg = new TLegend(0.6,0.6,0.9,0.9);
   leg->SetFillColor(0);
@@ -536,10 +630,12 @@ void FitterBase::splot(TString var, TString data, vector<TString> compDsets, int
 
   splot->Draw();
   leg->Draw("same");
+  text->Draw("same");
   canv->Update();
   canv->Modified();
-  canv->Print(Form("plots/splot_v%s.pdf",var.Data()));
-  canv->Print(Form("plots/splot_v%s.png",var.Data()));
+  canv->Print(Form("plots/%s/pdf/splot_v%s.pdf",fitterName.Data(),var.Data()));
+  canv->Print(Form("plots/%s/png/splot_v%s.png",fitterName.Data(),var.Data()));
+  canv->Print(Form("plots/%s/C/splot_v%s.C",    fitterName.Data(),var.Data()));
 
   TCanvas *canvResid = createCanvas();
   for (unsigned int i=0; i<compHists.size(); i++){
@@ -568,8 +664,9 @@ void FitterBase::splot(TString var, TString data, vector<TString> compDsets, int
   l->DrawLine(w->var(var)->getMin(),0.,w->var(var)->getMax(),0.);
   canvResid->Update();
   canvResid->Modified();
-  canvResid->Print(Form("plots/splot_resid_v%s.pdf",var.Data()));
-  canvResid->Print(Form("plots/splot_resid_v%s.png",var.Data()));
+  canvResid->Print(Form("plots/%s/pdf/splot_resid_v%s.pdf",fitterName.Data(),var.Data()));
+  canvResid->Print(Form("plots/%s/png/splot_resid_v%s.png",fitterName.Data(),var.Data()));
+  canvResid->Print(Form("plots/%s/C/splot_resid_v%s.C",    fitterName.Data(),var.Data()));
 
 }
 
@@ -712,7 +809,6 @@ void FitterBase::printEntry(int entry){
   for (map<TString,bool>::iterator val = values_b.begin(); val != values_b.end(); val++){
     print(Form(" \t %-20s %d",val->first.Data(),val->second),true);
   }
-  print(Form("----- Printing contents of entry %-6d: -----",entry),true);
   print("----------------------------------------------",true);
 
 }
