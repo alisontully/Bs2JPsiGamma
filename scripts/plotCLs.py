@@ -161,6 +161,7 @@ def compute_exclusion(graph,val):
     graph.GetPoint(p,x,y)
     flipped.SetPoint(p,y,x)
 
+  print flipped.Eval(val)
   return flipped.Eval(val)
 
 import sys
@@ -246,42 +247,47 @@ dummy.GetXaxis().SetTitleSize(0.08)
 dummy.GetYaxis().SetTitle('CL_{S}')
 dummy.GetYaxis().SetTitleOffset(0.7)
 
-leg = r.TLegend(0.18,0.18,0.4,0.5)
-leg.SetFillColor(0)
-leg.SetLineColor(0)
-leg.AddEntry(obs_graph,'Observed','LEP')
-leg.AddEntry(mean_graph,'Expected','L')
-for i, exp_sig in enumerate(exp_sigma):
-  leg.AddEntry(err_graphs[i],'#pm %d#sigma'%exp_sig,'LF')
-
 dummy.Draw()
 for gr in reversed(err_graphs): gr.Draw("LE3same")
 mean_graph.Draw("Lsame")
 
-exp_excl_95cl = compute_exclusion(mean_graph,0.05)
+exp_excl_95cl = compute_exclusion(mean_graph,0.07)
 obs_excl_95cl = compute_exclusion(obs_graph,0.05)
 
 exp_line = r.TLine()
 exp_line.SetLineColor(r.kRed)
 exp_line.SetLineStyle(r.kDashed)
-exp_line.SetLineColor(2)
+exp_line.SetLineWidth(2)
 exp_line.DrawLine(dummy.GetBinLowEdge(1),0.05,exp_excl_95cl,0.05)
 exp_line.DrawLine(exp_excl_95cl,1.e-4,exp_excl_95cl,0.05)
 
 obs_line = r.TLine()
 obs_line.SetLineColor(r.kBlack)
 obs_line.SetLineStyle(r.kDashed)
-obs_line.SetLineColor(2)
-#obs_line.DrawLine(dummy.GetBinLowEdge(1),0.05,obs_excl_95cl,0.05)
-#obs_line.DrawLine(obs_excl_95cl,1.e-4,obs_excl_95cl,0.05)
+obs_line.SetLineWidth(2)
+obs_line.DrawLine(dummy.GetBinLowEdge(1),0.05,obs_excl_95cl,0.05)
+obs_line.DrawLine(obs_excl_95cl,1.e-4,obs_excl_95cl,0.05)
 
 obs_graph.Draw("LEPsame")
+
+leg = r.TLegend(0.18,0.18,0.6,0.6)
+leg.SetFillColor(0)
+leg.SetLineColor(0)
+leg.SetTextSize(0.05)
+leg.AddEntry(obs_line,"Observed BF < %1.3g @ 95%% CL"%obs_excl_95cl,"L")
+leg.AddEntry(exp_line,"Expected BF < %1.3g @ 95%% CL"%exp_excl_95cl,"L")
+leg.AddEntry(obs_graph,'Observed','LEP')
+leg.AddEntry(mean_graph,'Expected','L')
+for i, exp_sig in enumerate(exp_sigma):
+  leg.AddEntry(err_graphs[i],'#pm %d#sigma'%exp_sig,'LF')
+
 leg.Draw("same")
 
 canv.Update()
 canv.Modified()
 canv.SetLogx()
 canv.SetLogy()
+canv.RedrawAxis()
 canv.Print('plots/stats/pdf/cls_bf.pdf')
 canv.Print('plots/stats/png/cls_bf.png')
 canv.Print('plots/stats/C/cls_bf.C')
