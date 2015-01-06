@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import ROOT as r
+r.gROOT.ProcessLine('.x ~/Scratch/lhcb/lhcbStyle.C')
 
 cls_canvs = []
 
@@ -60,8 +61,12 @@ def getCLs(tree):
     if sb_test_stat > dataTestStat: n_sb_toys_above_data += 1
     if sb_test_stat > sig_expec: n_sb_toys_above_sig_expec += 1 # should hope this is 50%
 
-  obs_cls = ( float(n_bkg_toys_above_data)/float(btoys.GetEntries()) ) / ( float(n_sb_toys_above_data)/float(sbtoys.GetEntries()) )
-  exp_cls = ( float(n_bkg_toys_above_sig_expec)/float(btoys.GetEntries()) ) / ( float(n_sb_toys_above_sig_expec)/float(sbtoys.GetEntries()) )
+  obs_cls = ( float(n_sb_toys_above_data)/float(sbtoys.GetEntries()) ) / ( float(n_bkg_toys_above_data)/float(btoys.GetEntries()) )
+  exp_cls = ( float(n_sb_toys_above_sig_expec)/float(sbtoys.GetEntries()) ) / ( float(n_bkg_toys_above_sig_expec)/float(btoys.GetEntries()) )
+
+  print 'BkgToys -- %d (above data) , %d (above expec), %d (total)'%(n_bkg_toys_above_data,n_bkg_toys_above_sig_expec,btoys.GetEntries())
+  print 'SBToys  -- %d (above data) , %d (above expec), %d (total)'%(n_sb_toys_above_data,n_sb_toys_above_sig_expec,sbtoys.GetEntries())
+  print 'CLs -- %4.2f (obs) , %4.2f (exp)'%(obs_cls, exp_cls)
 
   btoys.SetLineColor(r.kBlue)
   btoys.SetLineWidth(2)
@@ -77,10 +82,27 @@ def getCLs(tree):
   leg.AddEntry(sbtoys,"S+B Toys","L")
   leg.AddEntry(data,"Observation","L")
 
+  sbtoys.GetXaxis().SetTitle('-2LLR')
+  sbtoys.GetXaxis().SetTitleOffset(0.8)
+  sbtoys.GetYaxis().SetTitle('Number of Toys')
+  sbtoys.GetYaxis().SetTitleOffset(0.7)
+
+  pave = r.TPaveText(0.15,0.7,0.4,0.9,"ndc")
+  pave.SetFillColor(0)
+  pave.SetShadowColor(0)
+  pave.SetLineColor(0)
+  pave.SetTextAlign(11)
+  pave.SetTextSize(0.05)
+  pave.AddText('BF_{H} = %g'%hypothBF)
+  pave.AddText("CL_{S} (obs) = %4.2f"%obs_cls)
+  pave.AddText("CL_{S} (exp) = %4.2f"%exp_cls)
+
   sbtoys.Draw("HIST")
   btoys.Draw("HISTsame")
   data.Draw("HISTsame")
   leg.Draw("same")
+  pave.Draw("same")
+  cls_canvs[-1].SetLogy()
   cls_canvs[-1].Update()
   cls_canvs[-1].Modified()
   cls_canvs[-1].Print("plots/stats/pdf/cls_p%d.pdf"%p)

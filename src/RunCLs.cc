@@ -50,7 +50,12 @@ void RunCLs::setup(TString infile, TString outfile){
   system("mkdir -p plots/stats/png");
   system("mkdir -p plots/stats/C");
 
+  bf_hypoth_vals.push_back(1.e-7);
+  bf_hypoth_vals.push_back(5.e-7);
+  bf_hypoth_vals.push_back(1.e-6);
   bf_hypoth_vals.push_back(5.e-6);
+  bf_hypoth_vals.push_back(1.e-5);
+  bf_hypoth_vals.push_back(5.e-5);
 
   RooRandom::randomGenerator()->SetSeed(0);
 
@@ -111,6 +116,8 @@ void RunCLs::setSeed(int seed){
 
 void RunCLs::runData() {
 
+  cout << "Computing Test Stat in Data: " << endl;
+
   toyn = -1;
 
   // do best fit first
@@ -123,6 +130,7 @@ void RunCLs::runData() {
 
   // loop each signal hypo and fill test stat
   for (unsigned int i=0; i<bf_hypoth_vals.size(); i++){
+    cout << "\t" << "Fit " << i+1 << "/" << bf_hypoth_vals.size() << endl;
     hypothBF = bf_hypoth_vals[i];
     w->var("BF")->setConstant(false);
     w->var("BF")->setVal(hypothBF);
@@ -154,7 +162,7 @@ void RunCLs::runToy() {
   // find best fit of bkg only toy
   w->var("BF")->setConstant(false);
   RooFitResult *bkgRes = w->pdf("simpdf")->fitTo(*btoydset,Extended(),Save());
-  cout << "\t" << "Fit 1/4" << endl;
+  cout << "\t" << "Fit 1/" << (bf_hypoth_vals.size()*3)+1 << endl;
   btoy_fitBF = w->var("BF")->getVal();
   btoy_bestMinNll = bkgRes->minNll();
 
@@ -168,7 +176,7 @@ void RunCLs::runToy() {
     w->var("BF")->setVal(hypothBF);
     w->var("BF")->setConstant(true);
     RooFitResult *sbRes = w->pdf("simpdf")->fitTo(*btoydset,Extended(),Save());
-    cout << "\t" << "Fit 2/4" << endl;
+    cout << "\t" << "Fit " << (i*3)+2 << "/" << (bf_hypoth_vals.size()*3)+1 << endl;
     btoy_hypothMinNll = sbRes->minNll();
     btoy_teststat = 2.*(btoy_hypothMinNll-btoy_bestMinNll);
     w->var("BF")->setConstant(false);
@@ -180,7 +188,7 @@ void RunCLs::runToy() {
     // 3. find best fit of s+b toy
     w->var("BF")->setConstant(false);
     RooFitResult *bestRes = w->pdf("simpdf")->fitTo(*sbtoydset,Extended(),Save());
-    cout << "\t" << "Fit 3/4" << endl;
+    cout << "\t" << "Fit " << (i*3)+3 << "/" << (bf_hypoth_vals.size()*3)+1 << endl;
     sbtoy_fitBF = w->var("BF")->getVal();
     sbtoy_bestMinNll = bestRes->minNll();
 
@@ -189,7 +197,7 @@ void RunCLs::runToy() {
     w->var("BF")->setVal(hypothBF);
     w->var("BF")->setConstant(true);
     RooFitResult *hypothRes = w->pdf("simpdf")->fitTo(*sbtoydset,Extended(),Save());
-    cout << "\t" << "Fit 4/4" << endl;
+    cout << "\t" << "Fit " << (i*3)+4 << "/" << (bf_hypoth_vals.size()*3)+1 << endl;
     sbtoy_hypothMinNll = hypothRes->minNll();
     sbtoy_teststat = 2.*(sbtoy_hypothMinNll-sbtoy_bestMinNll);
     w->var("BF")->setConstant(false);

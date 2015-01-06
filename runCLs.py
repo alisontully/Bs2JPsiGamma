@@ -4,6 +4,7 @@ from optparse import OptionParser
 parser = OptionParser()
 parser.add_option("-i","--infile",default="model_ws.root",help="Name of input root file. Default=%default")
 parser.add_option("-o","--outfile",default="CLsOut.root",help="Name of output file. Default=%default")
+parser.add_option("-d","--dir",default="stats",help="Directory to store CLs output")
 parser.add_option("-t","--ntoys",default=-1,type="int",help="Number of toys to run")
 parser.add_option("-j","--njobs",default=-1,type="int",help="Number of different jobs to run")
 parser.add_option("-p","--plot",default=False,action="store_true",help="Make plot")
@@ -28,9 +29,9 @@ if opts.njobs<0:
 
 else:
   import os
-  os.system('mkdir -p stats')
+  os.system('mkdir -p %s'%opts.dir)
   for j in range(opts.njobs):
-    f = open('%s/stats/sub_j%d.sh'%(os.getcwd(),j),'w')
+    f = open('%s/%s/sub_j%d.sh'%(os.getcwd(),opts.dir,j),'w')
     f.write('#!/bin/bash\n')
     f.write('touch %s.run\n'%f.name)
     f.write('rm -f %s.fail\n'%f.name)
@@ -50,7 +51,7 @@ else:
     f.write('cp %s/%s .\n'%(os.getcwd(),opts.infile))
     exec_line = './runCLs.py -i %s -o %s -t %d'%(opts.infile,opts.outfile,opts.ntoys)
     f.write('if ( %s ) then\n'%exec_line)
-    f.write('\tmv %s %s/stats/%s\n'%(opts.outfile,os.getcwd(),opts.outfile.replace('.root','_j%d.root'%j)))
+    f.write('\tmv %s %s/%s/%s\n'%(opts.outfile,os.getcwd(),opts.dir,opts.outfile.replace('.root','_j%d.root'%j)))
     f.write('\ttouch %s.done\n'%f.name)
     f.write('else\n')
     f.write('\ttouch %s.fail\n'%f.name)
