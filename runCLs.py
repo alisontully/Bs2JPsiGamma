@@ -7,6 +7,7 @@ parser.add_option("-o","--outfile",default="CLsOut.root",help="Name of output fi
 parser.add_option("-d","--dir",default="stats",help="Directory to store CLs output")
 parser.add_option("-t","--ntoys",default=-1,type="int",help="Number of toys to run")
 parser.add_option("-j","--njobs",default=-1,type="int",help="Number of different jobs to run")
+parser.add_option("-s","--startjob",default=0,type="int",help="Start job numbering from here")
 parser.add_option("-p","--plot",default=False,action="store_true",help="Make plot")
 parser.add_option("-q","--queue",help="Batch queue to submit to")
 (opts,args) = parser.parse_args()
@@ -30,7 +31,7 @@ if opts.njobs<0:
 else:
   import os
   os.system('mkdir -p %s'%opts.dir)
-  for j in range(opts.njobs):
+  for j in range(opts.startjob,opts.startjob+opts.njobs):
     f = open('%s/%s/sub_j%d.sh'%(os.getcwd(),opts.dir,j),'w')
     f.write('#!/bin/bash\n')
     f.write('touch %s.run\n'%f.name)
