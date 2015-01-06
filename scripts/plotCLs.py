@@ -151,6 +151,18 @@ def getCLs(tree):
 
   return (hypothBF, cls_vals)
 
+def compute_exclusion(graph,val):
+  # flip graph
+  points = []
+  flipped = r.TGraph()
+  x = r.Double()
+  y = r.Double()
+  for p in range(graph.GetN()):
+    graph.GetPoint(p,x,y)
+    flipped.SetPoint(p,y,x)
+
+  return flipped.Eval(val)
+
 import sys
 if len(sys.argv)!=2:
   sys.exit('usage plotCLs.py <dir_w_files>')
@@ -187,6 +199,7 @@ for tree in list_of_trees:
     tree.Add(fil)
 
   hypothBF, cls_vals = getCLs(tree)
+  if hypothBF>2.e-5: continue
   cls_info.append([hypothBF, cls_vals])
 
 cls_info.sort(key=lambda x: x[0])
@@ -226,7 +239,7 @@ obs_graph.SetMarkerColor(r.kBlack)
 dummy = r.TH1F('d','d',1,cls_info[0][0]*0.5,cls_info[-1][0]*2.)
 canv = r.TCanvas()
 dummy.SetLineColor(0)
-dummy.GetYaxis().SetRangeUser(1.e-6,1)
+dummy.GetYaxis().SetRangeUser(1.e-4,1)
 dummy.GetXaxis().SetTitle('B_{s} #rightarrow J/#psi#gamma BF')
 dummy.GetXaxis().SetTitleOffset(0.9)
 dummy.GetXaxis().SetTitleSize(0.08)
@@ -244,6 +257,24 @@ for i, exp_sig in enumerate(exp_sigma):
 dummy.Draw()
 for gr in reversed(err_graphs): gr.Draw("LE3same")
 mean_graph.Draw("Lsame")
+
+exp_excl_95cl = compute_exclusion(mean_graph,0.05)
+obs_excl_95cl = compute_exclusion(obs_graph,0.05)
+
+exp_line = r.TLine()
+exp_line.SetLineColor(r.kRed)
+exp_line.SetLineStyle(r.kDashed)
+exp_line.SetLineColor(2)
+exp_line.DrawLine(dummy.GetBinLowEdge(1),0.05,exp_excl_95cl,0.05)
+exp_line.DrawLine(exp_excl_95cl,1.e-4,exp_excl_95cl,0.05)
+
+obs_line = r.TLine()
+obs_line.SetLineColor(r.kBlack)
+obs_line.SetLineStyle(r.kDashed)
+obs_line.SetLineColor(2)
+#obs_line.DrawLine(dummy.GetBinLowEdge(1),0.05,obs_excl_95cl,0.05)
+#obs_line.DrawLine(obs_excl_95cl,1.e-4,obs_excl_95cl,0.05)
+
 obs_graph.Draw("LEPsame")
 leg.Draw("same")
 

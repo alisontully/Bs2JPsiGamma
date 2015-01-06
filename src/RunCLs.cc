@@ -214,8 +214,8 @@ void RunCLs::runToy() {
 
     resultTrees[i]->Fill();
 
-    toyn++;
   }
+  toyn++;
 
 }
 
