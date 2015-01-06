@@ -8,9 +8,9 @@ def getCLs(tree):
 
   p = len(cls_canvs)
   cls_canvs.append(r.TCanvas('c%d'%p,'c%d'%p,(p+1)*10,(p+1)*10,800,600))
-  btoys = r.TH1F('btoys_p%d'%p,'btoys',100,0,25)
-  sbtoys = r.TH1F('sbtoys_p%d'%p,'sbtoys',100,0,25)
-  data = r.TH1F('data_p%d'%p,'data',10000,0,25)
+  btoys = r.TH1F('btoys_p%d'%p,'btoys',100,0,10)
+  sbtoys = r.TH1F('sbtoys_p%d'%p,'sbtoys',100,0,10)
+  data = r.TH1F('data_p%d'%p,'data',10000,0,10)
   hypothBF = -999.
   dataTestStat = -999.
 
@@ -22,7 +22,7 @@ def getCLs(tree):
     dataTestStat = tree.sbtoy_teststat
     entry += 1
 
-  data.SetBinContent(data.FindBin(dataTestStat),tree.GetEntries()/100)
+  data.SetBinContent(data.FindBin(dataTestStat),tree.GetEntries()/10)
 
   # get test stat value in toys
   for entry in range(tree.GetEntries()):
@@ -84,6 +84,8 @@ def getCLs(tree):
   cls_canvs[-1].Update()
   cls_canvs[-1].Modified()
   cls_canvs[-1].Print("plots/stats/pdf/cls_p%d.pdf"%p)
+  cls_canvs[-1].Print("plots/stats/png/cls_p%d.png"%p)
+  cls_canvs[-1].Print("plots/stats/C/cls_p%d.C"%p)
 
   return (hypothBF,0.05)
 
@@ -94,11 +96,14 @@ if len(sys.argv)!=2:
 direc = sys.argv[1]
 
 import os
+os.system('mkdir -p plots/stats/pdf')
+os.system('mkdir -p plots/stats/png')
+os.system('mkdir -p plots/stats/C')
 import fnmatch
 for root, dirs, files in os.walk(direc):
   if root != direc: continue
   rel_files = fnmatch.filter(files,'*.root')
-  rel_files.remove('model_ws.root')
+  if 'model_ws.root' in rel_files: rel_files.remove('model_ws.root')
 
 rel_files = [ direc+'/'+x for x in rel_files ]
 print rel_files
