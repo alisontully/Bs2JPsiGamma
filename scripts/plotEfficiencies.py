@@ -1,7 +1,10 @@
 #!/usr/bin/env python
 
+import os
 import sys
 import ROOT as r
+
+os.system('mkdir -p plots/Efficiencies')
 
 r.gROOT.ProcessLine(".x ~/Scratch/lhcb/lhcbStyle.C")
 r.gStyle.SetGridWidth(3)
@@ -109,7 +112,7 @@ def draw(th2f, name, textformat='', col=False):
   else: th2f.Draw("TEXT")
   canvs[-1].Update()
   canvs[-1].Modified()
-  canvs[-1].Print("plots/eff_%s.pdf"%name)
+  canvs[-1].Print("plots/Efficiencies/eff_%s.pdf"%name)
 
 # __main__
 passDict = fillDict('hPass')

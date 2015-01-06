@@ -109,13 +109,11 @@ bool BDTReaderSplitLLDD::AnalyseEvent(Looper *l){
 
 	*l->bdtoutput = readerContainer[trackType][relBDT]->EvaluateMVA( Form("BDT%dmethod",relBDT) );
 
-  // training mass window
-  //if ((l->itype>0) && (*l->B0_MM < 5500 || *l->B0_MM > 6500)) return false;
-
-	// bdt cut?
-	//if ( *l->bdtoutput < 0.2 ) return false;
-  if ( trackType == "LL" && *l->bdtoutput < 0.35 ) return false;
-  if ( trackType == "DD" && *l->bdtoutput < 0.45  ) return false;
+	// bdt cut
+  *l->pass_bdt = false;
+  if ( ( trackType == "LL" && *l->bdtoutput < 0.35 ) || ( trackType == "DD" && *l->bdtoutput < 0.45  ) ) {
+    *l->pass_bdt = true;
+  }
 
 	// step up counter
 	evCount++;

@@ -117,3 +117,4 @@ Float_t         bdtoutput                                    0
 Double_t        Kplus_PIDK                                   0
 Double_t        piminus_PIDK                                 0
 Double_t        phi_mass                                     0
+Bool_t          pass_bdt                                     0

@@ -14,8 +14,8 @@
 branchdef=AnalysisBranches
 analysers=TruthMatching,Trigger,PreSelection,BDTInputPlotter
 
-itype=-81  	name=MC2012 					fname=nTuples/Bs2JpsiGamma_MC_2012.root           		tname=JpsiGamma_Tuple/DecayTree
-itype=81  	name=Data2012 				fname=nTuples/Bs2JpsiGamma_data_2012.root  						tname=JpsiGamma_Tuple/DecayTree
-itype=71    name=Data2011         fname=nTuples/Bs2JpsiGamma_data_2011.root      				tname=JpsiGamma_Tuple/DecayTree
+itype=-81  	name=MC2012 					fname=nTuples/Bs2JpsiGamma_MC.root                		tname=JpsiGamma_Tuple/DecayTree
+itype=81  	name=Data2012 				fname=nTuples/Bs2JpsiGamma_2012.root  						    tname=JpsiGamma_Tuple/DecayTree
+itype=71    name=Data2011         fname=nTuples/Bs2JpsiGamma_2011.root      				    tname=JpsiGamma_Tuple/DecayTree
 
 

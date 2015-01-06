@@ -18,11 +18,12 @@ void BDTInputPlotter::defineHistograms(){
   addHist("B0_MM", "m(#mu^{+}#mu^{-}#gamma) (MeV)"    , 100,4500,6000,"L");
   addHist("B0_P",  "p(#mu^{+}#mu^{-}#gamma) (MeV)"    , 50,0,800e3,"R");
   addHist("B0_PT", "p_{T}(#mu^{+}#mu^{-}#gamma) (MeV)", 50,0,20e3,"R");
-  addHist("B0_DIRA_OWNPV","B_{s}^{0} DIRA", 50,0.99999,1.,"L");
+  addHist("B0_DIRA_OWNPV","B_{s}^{0} DIRA", 50,0.9999,1.,"L");
   addHist("B0_ENDVERTEX_CHI2","B_{s}^{0} vertex #chi^{2}", 50,0,20,"L");
   addHist("B0_ISOLATION_BDT1_highq2","B_{s}^{0} isolation", 50,-1,1,"L");
   addHist("B0_TAU","#tau(B_{s}^{0}) (ps)",50,0,0.015,"R");
   addHist("gamgams_PT","p_{T}(#gamma) (MeV)", 50,0,10e3,"R");
+  addHist("muminus_CosTheta", "#mu^{-}cos(#theta)", 50,-1,1.,"R");
 
 }
 
@@ -55,6 +56,7 @@ bool BDTInputPlotter::fillHistograms(Looper *l){
   fillHist("B0_ISOLATION_BDT1_highq2",*l->B0_ISOLATION_BDT1_highq2,l);
   fillHist("B0_TAU",*l->B0_TAU,l);
   fillHist("gamgams_PT",*l->gamgams_PT,l);
+  fillHist("muminus_CosTheta",*l->muminus_CosTheta,l);
 
   return true;
 }

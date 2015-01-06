@@ -53,6 +53,7 @@ class Runner {
     TH2F *hPass;
     TH2F *hFail;
     TH2F *hEff;
+    TH1I *hType;
 		Long64_t nentries;
 		Long64_t firstEntry;
 		Long64_t lastEntry;

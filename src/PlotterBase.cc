@@ -19,6 +19,9 @@ PlotterBase::PlotterBase(TString _name):
 {
   TH1F::SetDefaultSumw2();
   gROOT->ProcessLine(".x /Users/matt/Scratch/lhcb/lhcbStyle.C");
+  system(Form("mkdir -p plots/%s/pdf",_name.Data()));
+  system(Form("mkdir -p plots/%s/png",_name.Data()));
+  system(Form("mkdir -p plots/%s/C",_name.Data()));
 }
 
 PlotterBase::~PlotterBase(){}
@@ -274,8 +277,9 @@ void PlotterBase::drawHistograms(){
       canv->Update();
       canv->Modified();
     }
-    canv->Print(Form("plots/%s.pdf",hist->name.Data()));
-    canv->Print(Form("plots/%s.png",hist->name.Data()));
+    canv->Print(Form("plots/%s/pdf/%s.pdf",name.Data(),hist->name.Data()));
+    canv->Print(Form("plots/%s/png/%s.png",name.Data(),hist->name.Data()));
+    canv->Print(Form("plots/%s/C/%s.C",name.Data(),hist->name.Data()));
     delete canv;
     delete legend;
 

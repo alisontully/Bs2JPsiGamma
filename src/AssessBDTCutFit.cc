@@ -1,3 +1,5 @@
+#include <fstream>
+
 #include "../interface/AssessBDTCutFit.h"
 
 using namespace std;
@@ -204,17 +206,22 @@ void AssessBDTCutFit::run(){
   double exp_bkg_dd = integral("jpsig_dd_pdf","B0_MM","jpsig_bkg_dd_y",5250,5400);
   double frac_ll_bkg = exp_bkg_ll/(exp_bkg_ll+exp_bkg_dd);
 
-  cout << "========= SUMMARY ========" << endl;
-  cout << "LL: " << endl;
-  cout << "\t nSig = " << exp_sig_ll << endl;
-  cout << "\t nBkg = " << exp_bkg_ll << endl;
-  cout << "DD: " << endl;
-  cout << "\t nSig = " << exp_sig_dd << endl;
-  cout << "\t nBkg = " << exp_bkg_dd << endl;
-  cout << "==========================" << endl;
-  cout << "fLL Sig: " << frac_ll_sig << endl;
-  cout << "fll Bkg: " << frac_ll_bkg << endl;
-  cout << "==========================" << endl;
+  ofstream fout;
+  fout.open("plots/AssessBDTCutFit/exp_events.log");
+  fout << "LL: " << endl;
+  fout << "========= SUMMARY ========" << endl;
+  fout << "LL: " << endl;
+  fout << "\t nSig = " << exp_sig_ll << endl;
+  fout << "\t nBkg = " << exp_bkg_ll << endl;
+  fout << "DD: " << endl;
+  fout << "\t nSig = " << exp_sig_dd << endl;
+  fout << "\t nBkg = " << exp_bkg_dd << endl;
+  fout << "==========================" << endl;
+  fout << "fLL Sig: " << frac_ll_sig << endl;
+  fout << "fll Bkg: " << frac_ll_bkg << endl;
+  fout << "==========================" << endl;
+  fout.close();
+  system("cat plots/AssessBDTCutFit/exp_events.log");
 
 }
 

@@ -11,7 +11,7 @@ AnalysisFit::~AnalysisFit(){}
 
 void AnalysisFit::addObsVars(){
 
-  addObsVar("B0_MM",         "m(#mu^{+}#mu{-}#gamma)",  "MeV",    4500,   7000);
+  addObsVar("B0_MM",         "m(#mu^{+}#mu^{-}#gamma)",  "MeV",    4500,   7000);
 }
 
 void AnalysisFit::addCuts(){
@@ -40,6 +40,7 @@ void AnalysisFit::addDatasets(){
   addRequirement("MCJpsiGDD","eminus_TRACK_Type",         5);
 
   addDataset("MCJpsiPiz", "MC (J/#psi#pi^{0})",   -82);
+  addDataset("MCJpsiEta", "MC (J/#psi#eta)",      -83);
   addDataset("MCJpsiKs",  "MC (J/#psiK_{S})",     -85);
   addDataset("MCJpsiKst", "MC (J/#psiK*^{0})",    -86);
   addDataset("MCJpsiRho", "MC (J/#psi#rho)",      -87);
@@ -79,6 +80,14 @@ void AnalysisFit::constructPdfs(){
   defineParamSet("jpsipiz_pdf");
   w->pdf("jpsipiz_pdf")->SetTitle("PDF (J/#psi#pi^{0})");
 
+  // JpsiEta MC
+  w->factory("jpsieta_mean[4800,5500]");
+  w->factory("CBShape::jpsieta_cb1(B0_MM,jpsieta_mean,jpsieta_sigma_1[20,10,200],jpsieta_alpha_1[0.,20.],jpsieta_n_1[0.1,50.])");
+  w->factory("CBShape::jpsieta_cb2(B0_MM,jpsieta_mean,jpsieta_sigma_2[20,10,200],jpsieta_alpha_2[-20.,0.],jpsieta_n_2[0.1,50.])");
+  w->factory("SUM::jpsieta_pdf( jpsieta_f_1[0.5,0.,1.]*jpsieta_cb1, jpsieta_cb2 )");
+  defineParamSet("jpsieta_pdf");
+  w->pdf("jpsieta_pdf")->SetTitle("PDF (J/#psi#eta)");
+
   // JpsiKs
   w->factory("Gaussian::jpsiks_pdf( B0_MM, jpsiks_mean[4800,5800], jpsiks_sigma[100,80,500] )");
   defineParamSet("jpsiks_pdf");
@@ -100,7 +109,7 @@ void AnalysisFit::constructPdfs(){
   w->pdf("jpsig_bkg_pdf")->SetTitle("PDF (J/#psi#gamma) Background");
 
   // JpsiG TOTAL
-  w->factory("SUM::jpsig_pdf( jpsig_sig_y[0,5000]*jpsig_sig_pdf, jpsig_bkg_y[0,1e5]*jpsig_bkg_pdf, jpsipiz_y[0,1e4]*jpsipiz_pdf, jpsiks_y[0,5000]*jpsiks_pdf, jpsikst_y[0,5000]*jpsikst_pdf, jpsirho_y[0,5000]*jpsirho_pdf )");
+  w->factory("SUM::jpsig_pdf( jpsig_sig_y[0,5000]*jpsig_sig_pdf, jpsig_bkg_y[0,1e5]*jpsig_bkg_pdf, jpsipiz_y[0,1e4]*jpsipiz_pdf, jpsieta_y[0,1e4]*jpsieta_pdf, jpsiks_y[0,5000]*jpsiks_pdf, jpsikst_y[0,5000]*jpsikst_pdf, jpsirho_y[0,5000]*jpsirho_pdf )");
   defineParamSet("jpsig_pdf");
   defineYieldSet("jpsig_pdf");
   w->pdf("jpsig_pdf")->SetTitle("PDF (J/#psi#gamma)");
@@ -122,6 +131,10 @@ void AnalysisFit::run(){
   fit("jpsipiz_pdf","MCJpsiPiz");
   plot("B0_MM","MCJpsiPiz","jpsipiz_pdf","MC Fit");
   freeze("jpsipiz_pdf");
+
+  fit("jpsieta_pdf","MCJpsiEta");
+  plot("B0_MM","MCJpsiEta","jpsieta_pdf","MC Fit");
+  freeze("jpsieta_pdf");
 
   fit("jpsiks_pdf","MCJpsiKs");
   plot("B0_MM","MCJpsiKs","jpsiks_pdf","MC Fit");
@@ -162,6 +175,9 @@ void AnalysisFit::makeDataPlot(){
   PlotComponent pc_pdf_jpsipiz( "jpsig_pdf:jpsipiz_pdf", "J/#psi#pi^{0}" );
   pc_pdf_jpsipiz.setDashedLine(kMagenta);
 
+  PlotComponent pc_pdf_jpsieta( "jpsig_pdf:jpsieta_pdf", "J/#psi#eta" );
+  pc_pdf_jpsieta.setDashedLine(kGreen-7);
+
   PlotComponent pc_pdf_jpsiks( "jpsig_pdf:jpsiks_pdf", "J/#psiK_{S}" );
   pc_pdf_jpsiks.setDashedLine(kOrange+1);
 
@@ -174,6 +190,7 @@ void AnalysisFit::makeDataPlot(){
   plotComps.push_back(pc_data);
   plotComps.push_back(pc_pdf_bkg);
   plotComps.push_back(pc_pdf_jpsipiz);
+  plotComps.push_back(pc_pdf_jpsieta);
   plotComps.push_back(pc_pdf_jpsiks);
   plotComps.push_back(pc_pdf_jpsikst);
   plotComps.push_back(pc_pdf_jpsirho);
@@ -183,22 +200,15 @@ void AnalysisFit::makeDataPlot(){
   w->var("jpsig_bkg_y")->SetTitle("N_{bkg}");
   w->var("jpsig_sig_y")->SetTitle("N_{sig}");
   w->var("jpsipiz_y")->SetTitle("N_{J#psi#pi^{0}}");
+  w->var("jpsieta_y")->SetTitle("N_{J#psi#eta}");
   w->var("jpsiks_y")->SetTitle("N_{J#psiK_{S}}");
   w->var("jpsikst_y")->SetTitle("N_{J#psiK*^{0}}");
   w->var("jpsirho_y")->SetTitle("N_{J#psi#rho}");
-  RooArgSet *argset = new RooArgSet();
-  argset->add(*w->var("jpsig_bkg_y"));
-  argset->add(*w->var("jpsig_sig_y"));
-  argset->add(*w->var("jpsipiz_y"));
-  argset->add(*w->var("jpsiks_y"));
-  argset->add(*w->var("jpsikst_y"));
-  argset->add(*w->var("jpsirho_y"));
 
   setPBoxX(0.35);
 
-  plot("B0_MM", plotComps, "preselfit_kstar", argset);
+  plot("B0_MM", plotComps, "preselfit_kstar", w->set("jpsig_pdf_yield_params"));
 
-  delete argset;
   return;
 }
 

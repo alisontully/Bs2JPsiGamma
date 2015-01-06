@@ -1,7 +1,12 @@
 #!/usr/bin/env python
 
+import os
 import sys
 import ROOT as r
+
+os.system('mkdir -p plots/SFitResiduals/pdf')
+os.system('mkdir -p plots/SFitResiduals/png')
+os.system('mkdir -p plots/SFitResiduals/C')
 
 r.gROOT.ProcessLine('.x ~/Scratch/lhcb/lhcbStyle.C')
 
@@ -19,8 +24,9 @@ line.SetLineStyle(r.kDashed)
 
 def draw(graph):
   canvs.append(r.TCanvas())
-  name = graph.GetName().split('_v')[-1]
-  graph.GetXaxis().SetTitle(name)
+  splits = graph.GetName().split('_v')
+  name = splits[-2]+'_'+splits[-1]
+  graph.GetXaxis().SetTitle(splits[-1])
   graph.GetYaxis().SetTitle("Data (sweighted) / MC")
   graph.GetXaxis().SetTitleOffset(0.8)
   graph.GetYaxis().SetTitleOffset(0.75)
@@ -30,7 +36,9 @@ def draw(graph):
   graph.Draw("PEsame")
   canvs[-1].Update()
   canvs[-1].Modified()
-  canvs[-1].Print("plots/splot_ratio_%s.pdf"%name)
+  canvs[-1].Print("plots/SFitResiduals/pdf/splot_ratio_%s.pdf"%name)
+  canvs[-1].Print("plots/SFitResiduals/png/splot_ratio_%s.png"%name)
+  canvs[-1].Print("plots/SFitResiduals/C/splot_ratio_%s.C"%name)
 
 tf = r.TFile(fname)
 

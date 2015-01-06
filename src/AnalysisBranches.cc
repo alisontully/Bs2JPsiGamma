@@ -372,6 +372,7 @@ void AnalysisBranches::initialiseVariables(Looper *l) {
 	l->nMuonCoordsS4                         = new Int_t(0);
 	l->nMuonTracks                           = new Int_t(0);
 	l->nPVs                                  = new Int_t(0);
+	l->pass_bdt                              = new Bool_t(0);
 	l->phi_mass                              = new Double_t(0);
 	l->piminus_P                             = new Double_t(0);
 	l->piminus_PE                            = new Double_t(0);
@@ -561,6 +562,7 @@ void AnalysisBranches::cleanVariables(Looper *l) {
 	delete l->nMuonCoordsS4;
 	delete l->nMuonTracks;
 	delete l->nPVs;
+	delete l->pass_bdt;
 	delete l->phi_mass;
 	delete l->piminus_P;
 	delete l->piminus_PE;
@@ -689,6 +691,7 @@ void AnalysisBranches::setOutputBranches(Looper *l, TTree *tree){
 	tree->Branch("muplus_PY",l->muplus_PY);
 	tree->Branch("muplus_PZ",l->muplus_PZ);
 	tree->Branch("nPVs",l->nPVs);
+	tree->Branch("pass_bdt",l->pass_bdt);
 	tree->Branch("phi_mass",l->phi_mass);
 	tree->Branch("piminus_PIDK",l->piminus_PIDK);
 }

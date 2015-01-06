@@ -42,6 +42,8 @@ void Runner::save(){
   hFail->Write();
   hEff->SetDirectory(outFile);
   hEff->Write();
+  hType->SetDirectory(outFile);
+  hType->Write();
   outFile->Close();
   //delete looper;
   //delete outTree;
@@ -164,6 +166,8 @@ void Runner::run(){
   hFail = new TH2F("hFail","nEvents fail",analysers.size()+1,0,analysers.size()+1,looper->treeContainers.size(),0,looper->treeContainers.size());
   hEff = new TH2F("hEff","Efficiencies",analysers.size()+1,0,analysers.size()+1,looper->treeContainers.size(),0,looper->treeContainers.size());
   setXLabel(1,"Start");
+  // Make histogram which maps the itype
+  hType = new TH1I("hType","itype of each data type",looper->treeContainers.size(),0,looper->treeContainers.size());
 
 	// Summarise results
 	cout << Form("%-30s","Runner::run()") << " " << "Analysers cut flow summary:" << endl;
@@ -172,14 +176,17 @@ void Runner::run(){
 	for (unsigned int t=0; t<looper->treeContainers.size(); t++){
 		cout << Form("%-30s","Runner::run()") << " " << "   " << looper->treeContainers[t].name << " : " << endl;
     outf << "   " << looper->treeContainers[t].name << " : " << endl;
-    // set histogram labels
+    // set efficiency histogram labels
     setYLabel(t+1,looper->treeContainers[t].name);
+    // set type histogram labels and values
+    hType->GetXaxis()->SetBinLabel(t+1,looper->treeContainers[t].name);
+    hType->SetBinContent(t+1,looper->treeContainers[t].itype);
     // start counters
     int totalpass=0;
     int totaltried=0;
 		for (unsigned int a=0; a<analysers.size(); a++){
 
-      // set histogram labels
+      // set efficiency histogram labels
       setXLabel(a+2,analysers[a]->name);
 
 			// total tried will be those from first analyser
@@ -195,7 +202,7 @@ void Runner::run(){
 			cout << Form("%-30s","Runner::run()") << " " << "      " << a+1 << ".) " << Form("%-15s",(analysers[a]->name+":").Data()) << "  " <<	nPassFail[t][a].first << "/" << nPassFail[t][a].first + nPassFail[t][a].second << " of events passed -- " << Form("%6.2f%%",eff) << " efficient" << endl;
       outf << "      " << a+1 << ".) " << Form("%-15s",(analysers[a]->name+":").Data()) << "  " <<	nPassFail[t][a].first << "/" << nPassFail[t][a].first + nPassFail[t][a].second << " of events passed -- " << Form("%6.2f%%",eff) << " efficient" << endl;
 
-      // set values in histograms
+      // set efficiency values in histograms
       setHistogramValues(a+1,t,nPassFail[t][a].first,nPassFail[t][a].second);
 		}
 
