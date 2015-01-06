@@ -4,14 +4,12 @@ import ROOT as r
 r.gROOT.ProcessLine('.x ~/Scratch/lhcb/lhcbStyle.C')
 
 cls_canvs = []
+exp_sigma = [1,2,3]
 
 def getCLs(tree):
 
   p = len(cls_canvs)
   cls_canvs.append(r.TCanvas('c%d'%p,'c%d'%p,(p+1)*10,(p+1)*10,800,600))
-  btoys = r.TH1F('btoys_p%d'%p,'btoys',100,0,10)
-  sbtoys = r.TH1F('sbtoys_p%d'%p,'sbtoys',100,0,10)
-  data = r.TH1F('data_p%d'%p,'data',10000,0,10)
   hypothBF = -999.
   dataTestStat = -999.
 
@@ -23,50 +21,92 @@ def getCLs(tree):
     dataTestStat = tree.sbtoy_teststat
     entry += 1
 
-  data.SetBinContent(data.FindBin(dataTestStat),tree.GetEntries()/10)
+  bkg_vals_list = []
+  sb_vals_list = []
 
   # get test stat value in toys
   for entry in range(tree.GetEntries()):
     tree.GetEntry(entry)
     hypothBF = tree.hypothBF
-    if tree.toyn<0: # data
-      continue
-    if ( tree.btoy_fitBF > tree.hypothBF ): # one-sided
-      btoys.Fill(0)
-    else:
-      btoys.Fill(tree.btoy_teststat)
-    if ( tree.sbtoy_fitBF > tree.hypothBF ): # one-sided
-      sbtoys.Fill(0)
-    else:
-      sbtoys.Fill(tree.sbtoy_teststat)
-
-  sig_expec = sbtoys.GetMean()
-
-  n_bkg_toys_above_data = 0
-  n_bkg_toys_above_sig_expec = 0
-  n_sb_toys_above_data = 0
-  n_sb_toys_above_sig_expec = 0
-
-  # get cls values
-  for entry in range(tree.GetEntries()):
-    tree.GetEntry(entry)
+    # data
     if tree.toyn<0: continue
-    bkg_test_stat = tree.btoy_teststat
-    if ( tree.btoy_fitBF > tree.hypothBF ): bkg_test_stat = 0.
-    sb_test_stat = tree.sbtoy_teststat
-    if ( tree.sbtoy_fitBF > tree.hypothBF ): sb_test_stat = 0.
-    # see if above criteria
-    if bkg_test_stat > dataTestStat: n_bkg_toys_above_data += 1
-    if bkg_test_stat > sig_expec: n_bkg_toys_above_sig_expec += 1
-    if sb_test_stat > dataTestStat: n_sb_toys_above_data += 1
-    if sb_test_stat > sig_expec: n_sb_toys_above_sig_expec += 1 # should hope this is 50%
+    # bkg
+    bkg_test_stat = tree.btoy_teststat if tree.btoy_fitBF <= tree.hypothBF else 0.
+    #bkg_test_stat = tree.btoy_teststat
+    bkg_vals_list.append(bkg_test_stat)
+    # sb
+    sb_test_stat  = tree.sbtoy_teststat if tree.sbtoy_fitBF <= tree.hypothBF else 0.
+    #sb_test_stat = tree.sbtoy_teststat
+    sb_vals_list.append(sb_test_stat)
 
-  obs_cls = ( float(n_sb_toys_above_data)/float(sbtoys.GetEntries()) ) / ( float(n_bkg_toys_above_data)/float(btoys.GetEntries()) )
-  exp_cls = ( float(n_sb_toys_above_sig_expec)/float(sbtoys.GetEntries()) ) / ( float(n_bkg_toys_above_sig_expec)/float(btoys.GetEntries()) )
+  import numpy as np
 
-  print 'BkgToys -- %d (above data) , %d (above expec), %d (total)'%(n_bkg_toys_above_data,n_bkg_toys_above_sig_expec,btoys.GetEntries())
-  print 'SBToys  -- %d (above data) , %d (above expec), %d (total)'%(n_sb_toys_above_data,n_sb_toys_above_sig_expec,sbtoys.GetEntries())
-  print 'CLs -- %4.2f (obs) , %4.2f (exp)'%(obs_cls, exp_cls)
+  bkg_vals_list.sort()
+  sb_vals_list.sort()
+  bkg_vals = np.array(bkg_vals_list)
+  sb_vals = np.array(sb_vals_list)
+
+  quantiles = []
+  test_stat_evals = []
+  btoy_counters = []
+  sbtoy_counters = []
+
+  # low expec err
+  for exp_s in reversed(exp_sigma):
+    quantile = 100.*r.TMath.Prob(exp_s**2,1)
+    quantiles.append(quantile)
+    test_stat_evals.append(np.percentile(bkg_vals,quantile))
+    btoy_counters.append(0)
+    sbtoy_counters.append(0)
+  # median
+  quantile = 50.
+  quantiles.append(quantile)
+  test_stat_evals.append(np.percentile(bkg_vals,quantile))
+  btoy_counters.append(0)
+  sbtoy_counters.append(0)
+  # high expec err
+  for exp_s in exp_sigma:
+    quantile = 100.*(1.-r.TMath.Prob(exp_s**2,1))
+    quantiles.append(quantile)
+    test_stat_evals.append(np.percentile(bkg_vals,quantile))
+    btoy_counters.append(0)
+    sbtoy_counters.append(0)
+  # observation
+  quantile = -1.
+  quantiles.append(quantile)
+  test_stat_evals.append(dataTestStat)
+  btoy_counters.append(0)
+  sbtoy_counters.append(0)
+
+  hmax = max(np.ceil(np.amax(bkg_vals)),np.ceil(np.amax(sb_vals)))
+
+  btoys = r.TH1F('btoys_p%d'%p,'btoys',100,0,hmax)
+  sbtoys = r.TH1F('sbtoys_p%d'%p,'sbtoys',100,0,hmax)
+  data = r.TH1F('data_p%d'%p,'data',10000,0,50)
+  data.SetBinContent(data.FindBin(dataTestStat),tree.GetEntries()/10)
+
+  # get cls values and fill hists
+  for bkg_val in bkg_vals:
+    btoys.Fill(bkg_val)
+    for i, test_stat_point in enumerate(test_stat_evals):
+      if bkg_val > test_stat_point:
+        btoy_counters[i] += 1
+  for sb_val in sb_vals:
+    sbtoys.Fill(sb_val)
+    for i, test_stat_point in enumerate(test_stat_evals):
+      if sb_val > test_stat_point:
+        sbtoy_counters[i] += 1
+
+  btoy_fracs = [ float(btoy_count)/float(len(bkg_vals)) for btoy_count in btoy_counters ]
+  sbtoy_fracs = [ float(sbtoy_count)/float(len(sb_vals)) for sbtoy_count in sbtoy_counters ]
+  cls_vals = [ sbtoy_fracs[i]/btoy_fracs[i] for i in range(len(btoy_fracs)) ]
+
+  print '%6s  %10s  %5s  %5s  %4s  %4s  %4s'%('quant','qval','nBkg','nSB','fBkg','fSB','CLs')
+  for i, test_stat_point in enumerate(test_stat_evals):
+    print '%6.2f  %10.7f  %5d  %5d  %4.2f  %4.2f  %4.2f'%(quantiles[i],test_stat_point,btoy_counters[i],sbtoy_counters[i],btoy_fracs[i],sbtoy_fracs[i],cls_vals[i])
+
+  obs_cls = cls_vals[-1]
+  exp_cls = cls_vals[len(exp_sigma)]
 
   btoys.SetLineColor(r.kBlue)
   btoys.SetLineWidth(2)
@@ -109,7 +149,7 @@ def getCLs(tree):
   cls_canvs[-1].Print("plots/stats/png/cls_p%d.png"%p)
   cls_canvs[-1].Print("plots/stats/C/cls_p%d.C"%p)
 
-  return (hypothBF,0.05)
+  return (hypothBF, cls_vals)
 
 import sys
 if len(sys.argv)!=2:
@@ -140,11 +180,80 @@ while ( testf.Get('result_tree_p%d'%i) != None ):
 
 testf.Close()
 
+cls_info = []
+
 for tree in list_of_trees:
   for fil in rel_files:
     tree.Add(fil)
 
-  (BF,CLs) = getCLs(tree)
+  hypothBF, cls_vals = getCLs(tree)
+  cls_info.append([hypothBF, cls_vals])
+
+cls_info.sort(key=lambda x: x[0])
+err_graphs = [ r.TGraphAsymmErrors() for i in range(len(exp_sigma)) ]
+mean_graph = r.TGraph()
+obs_graph = r.TGraph()
+
+for p, vals in enumerate(cls_info):
+
+  x = vals[0]
+  yobs = vals[1][-1]
+  obs_graph.SetPoint(p,x,yobs)
+  ymean = vals[1][len(exp_sigma)]
+  mean_graph.SetPoint(p,x,ymean)
+  for i in range(len(exp_sigma)):
+    err_graphs[-1-i].SetPoint(p,x,ymean)
+    err_graphs[-1-i].SetPointError(p,0.,0.,ymean-vals[1][i],vals[1][-2-i]-ymean)
+
+if len(err_graphs)>0:
+  err_graphs[0].SetLineColor(r.kYellow)
+  err_graphs[0].SetFillColor(r.kYellow)
+if len(err_graphs)>1:
+  err_graphs[1].SetLineColor(r.kGreen)
+  err_graphs[1].SetFillColor(r.kGreen)
+if len(err_graphs)>2:
+  err_graphs[2].SetLineColor(r.kBlue-7)
+  err_graphs[2].SetFillColor(r.kBlue-7)
+
+mean_graph.SetLineWidth(3)
+mean_graph.SetLineColor(r.kRed)
+
+obs_graph.SetLineWidth(3)
+obs_graph.SetLineColor(r.kBlack)
+obs_graph.SetMarkerColor(r.kBlack)
+
+# draw
+dummy = r.TH1F('d','d',1,cls_info[0][0]*0.5,cls_info[-1][0]*2.)
+canv = r.TCanvas()
+dummy.SetLineColor(0)
+dummy.GetYaxis().SetRangeUser(1.e-6,1)
+dummy.GetXaxis().SetTitle('B_{s} #rightarrow J/#psi#gamma BF')
+dummy.GetXaxis().SetTitleOffset(0.9)
+dummy.GetXaxis().SetTitleSize(0.08)
+dummy.GetYaxis().SetTitle('CL_{S}')
+dummy.GetYaxis().SetTitleOffset(0.7)
+
+leg = r.TLegend(0.18,0.18,0.4,0.5)
+leg.SetFillColor(0)
+leg.SetLineColor(0)
+leg.AddEntry(obs_graph,'Observed','LEP')
+leg.AddEntry(mean_graph,'Expected','L')
+for i, exp_sig in enumerate(exp_sigma):
+  leg.AddEntry(err_graphs[i],'#pm %d#sigma'%exp_sig,'LF')
+
+dummy.Draw()
+for gr in reversed(err_graphs): gr.Draw("LE3same")
+mean_graph.Draw("Lsame")
+obs_graph.Draw("LEPsame")
+leg.Draw("same")
+
+canv.Update()
+canv.Modified()
+canv.SetLogx()
+canv.SetLogy()
+canv.Print('plots/stats/pdf/cls_bf.pdf')
+canv.Print('plots/stats/png/cls_bf.png')
+canv.Print('plots/stats/C/cls_bf.C')
 
 raw_input('Done\n')
 

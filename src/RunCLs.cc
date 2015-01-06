@@ -50,12 +50,22 @@ void RunCLs::setup(TString infile, TString outfile){
   system("mkdir -p plots/stats/png");
   system("mkdir -p plots/stats/C");
 
-  bf_hypoth_vals.push_back(1.e-7);
   bf_hypoth_vals.push_back(5.e-7);
+  bf_hypoth_vals.push_back(6.e-7);
+  bf_hypoth_vals.push_back(7.e-7);
+  bf_hypoth_vals.push_back(8.e-7);
+  bf_hypoth_vals.push_back(9.e-7);
   bf_hypoth_vals.push_back(1.e-6);
+  bf_hypoth_vals.push_back(2.e-6);
+  bf_hypoth_vals.push_back(3.e-6);
+  bf_hypoth_vals.push_back(4.e-6);
   bf_hypoth_vals.push_back(5.e-6);
+  bf_hypoth_vals.push_back(6.e-6);
+  bf_hypoth_vals.push_back(7.e-6);
+  bf_hypoth_vals.push_back(8.e-6);
+  bf_hypoth_vals.push_back(9.e-6);
   bf_hypoth_vals.push_back(1.e-5);
-  bf_hypoth_vals.push_back(5.e-5);
+  bf_hypoth_vals.push_back(2.e-5);
 
   RooRandom::randomGenerator()->SetSeed(0);
 
