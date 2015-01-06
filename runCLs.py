@@ -30,7 +30,7 @@ else:
   import os
   os.system('mkdir -p stats')
   for j in range(opts.njobs):
-    f = open('stats/sub_j%d.sh'%j,'w')
+    f = open('%s/stats/sub_j%d.sh'%(os.getcwd(),j),'w')
     f.write('#!/bin/bash\n')
     f.write('touch %s.run\n'%f.name)
     f.write('rm -f %s.fail\n'%f.name)
