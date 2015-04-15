@@ -24,16 +24,23 @@ void BDTInputPlotter::defineHistograms(){
   addHist("B0_TAU","#tau(B_{s}^{0}) (ps)",50,0,0.015,"R");
   addHist("gamgams_PT","p_{T}(#gamma) (MeV)", 50,0,10e3,"R");
   addHist("muminus_CosTheta", "#mu^{-}cos(#theta)", 50,-1,1.,"R");
+  addHist("piminus_CosTheta", "#pi^{-}cos(#theta)", 50,-1,1.,"R");
 
 }
 
 void BDTInputPlotter::defineDrawingConfig(){
 
   // add these drawing options
-  addDrawOpt("mc_jpsigam",   "Signal", -81);
+  //addDrawOpt("mc_jpsigam",   "Signal", -81);
+  //setDrawOptDefaultFill(kBlue-7);
+
+  //addDrawOpt("data_jpsigam", "Background", 71, 81);
+  //setDrawOptDefaultLine(kRed);
+
+  addDrawOpt("mc_kstgam",   "Signal", -88);
   setDrawOptDefaultFill(kBlue-7);
 
-  addDrawOpt("data_jpsigam", "Background", 71, 81);
+  addDrawOpt("data_kstgam", "Background", 72, 82);
   setDrawOptDefaultLine(kRed);
 
   // add this as a residual plot option
@@ -57,6 +64,7 @@ bool BDTInputPlotter::fillHistograms(Looper *l){
   fillHist("B0_TAU",*l->B0_TAU,l);
   fillHist("gamgams_PT",*l->gamgams_PT,l);
   fillHist("muminus_CosTheta",*l->muminus_CosTheta,l);
+  fillHist("piminus_CosTheta",*l->piminus_CosTheta,l);
 
   return true;
 }

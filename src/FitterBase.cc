@@ -580,12 +580,12 @@ double FitterBase::integral(TString pdf, TString var, TString scale, double low,
   return value;
 }
 
-void FitterBase::splot(TString var, TString data, TString title, int bins){
+void FitterBase::splot(TString var, TString data, TString title, int bins, TString fnameext){
   vector<TString> temp;
-  splot(var, data, temp, title, bins);
+  splot(var, data, temp, title, bins, fnameext);
 }
 
-void FitterBase::splot(TString var, TString data, vector<TString> compDsets, TString title, int bins) {
+void FitterBase::splot(TString var, TString data, vector<TString> compDsets, TString title, int bins, TString fnameext) {
 
   if (!w->data(data)) {
     cerr << "ERROR -- FitterBase::splot() -- no sweighted data exists" << endl;
@@ -633,9 +633,9 @@ void FitterBase::splot(TString var, TString data, vector<TString> compDsets, TSt
   text->Draw("same");
   canv->Update();
   canv->Modified();
-  canv->Print(Form("plots/%s/pdf/splot_v%s.pdf",fitterName.Data(),var.Data()));
-  canv->Print(Form("plots/%s/png/splot_v%s.png",fitterName.Data(),var.Data()));
-  canv->Print(Form("plots/%s/C/splot_v%s.C",    fitterName.Data(),var.Data()));
+  canv->Print(Form("plots/%s/pdf/splot_v%s%s.pdf",fitterName.Data(),var.Data(),fnameext.Data()));
+  canv->Print(Form("plots/%s/png/splot_v%s%s.png",fitterName.Data(),var.Data(),fnameext.Data()));
+  canv->Print(Form("plots/%s/C/splot_v%s%s.C",    fitterName.Data(),var.Data(),fnameext.Data()));
 
   TCanvas *canvResid = createCanvas();
   for (unsigned int i=0; i<compHists.size(); i++){
@@ -664,9 +664,10 @@ void FitterBase::splot(TString var, TString data, vector<TString> compDsets, TSt
   l->DrawLine(w->var(var)->getMin(),0.,w->var(var)->getMax(),0.);
   canvResid->Update();
   canvResid->Modified();
-  canvResid->Print(Form("plots/%s/pdf/splot_resid_v%s.pdf",fitterName.Data(),var.Data()));
-  canvResid->Print(Form("plots/%s/png/splot_resid_v%s.png",fitterName.Data(),var.Data()));
-  canvResid->Print(Form("plots/%s/C/splot_resid_v%s.C",    fitterName.Data(),var.Data()));
+  if ( title != "") text->Draw("same");
+  canvResid->Print(Form("plots/%s/pdf/splot_resid_v%s%s.pdf",fitterName.Data(),var.Data(),fnameext.Data()));
+  canvResid->Print(Form("plots/%s/png/splot_resid_v%s%s.png",fitterName.Data(),var.Data(),fnameext.Data()));
+  canvResid->Print(Form("plots/%s/C/splot_resid_v%s%s.C",    fitterName.Data(),var.Data(),fnameext.Data()));
 
 }
 

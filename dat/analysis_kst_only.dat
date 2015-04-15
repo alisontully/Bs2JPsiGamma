@@ -1,0 +1,6 @@
+branchdef=AnalysisBranches
+analysers=TruthMatching,Trigger,PreSelection,BDTReaderSplitLLDD
+
+itype=-88   name=Bd2KstGamma          fname=nTuples/WithBremInfo/Bd2KstGamma_MC.root               tname=JpsiGamma_Tuple/DecayTree
+itype=72    name=DataKstG2011         fname=nTuples/WithBremInfo/Bd2KstGamma_2011.root             tname=JpsiGamma_Tuple/DecayTree
+itype=82    name=DataKstG2012         fname=nTuples/WithBremInfo/Bd2KstGamma_2012.root             tname=JpsiGamma_Tuple/DecayTree

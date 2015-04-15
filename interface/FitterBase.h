@@ -89,8 +89,8 @@ class FitterBase {
     void plot(TString var, TString data, TString pdf="", TString title="");
     void plot(TString var, std::vector<PlotComponent> plotComps, TString fname, const RooArgSet *params=NULL);
 
-    void splot(TString var, TString data, TString title="", int bins=-1);
-    void splot(TString var, TString data, std::vector<TString> compDsets, TString title="", int bins=-1);
+    void splot(TString var, TString data, TString title="", int bins=-1, TString fnameext="");
+    void splot(TString var, TString data, std::vector<TString> compDsets, TString title="", int bins=-1, TString fnameext="");
 
     void storeSPlotProjection(RooHist *rh, TString name);
     void storeSPlotRatio(RooHist *dh, RooHist *sh, TString name);

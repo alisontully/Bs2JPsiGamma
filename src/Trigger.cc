@@ -31,7 +31,7 @@ bool Trigger::AnalyseEvent(Looper *l){
 	// do physics here e.g.:
 
 	// only KstarGamma
-	if ( l->itype == 72 || l->itype == 82 || l->itype == -88) {
+	if ( l->itype == 72 || l->itype == 82 || l->itype == -88 || l->itype == -89 || l->itype==-90 ) {
 
 		// L0
 		if ( ! *l->B0_L0HadronDecision_TOS 								  &&

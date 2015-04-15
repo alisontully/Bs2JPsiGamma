@@ -1,6 +1,6 @@
 /////////////////////////////////////
 //                                 //
-// BDTReaderSplitLLDD.h            			   //
+// BDTReaderSplitLLDDFDChi2.h            			   //
 // Author: Matthew Kenzie          //
 // Will train BDTs   					     //
 //                                 //
@@ -9,21 +9,21 @@
 #include "TMath.h"
 #include "TLorentzVector.h"
 
-#include "../interface/BDTReaderSplitLLDD.h"
+#include "../interface/BDTReaderSplitLLDDFDChi2.h"
 
 using namespace std;
 using namespace TMVA;
 
-BDTReaderSplitLLDD::BDTReaderSplitLLDD(TString _name):
+BDTReaderSplitLLDDFDChi2::BDTReaderSplitLLDDFDChi2(TString _name):
 	BaseAnalyser(_name),
 	evCount(0),
 	numberOfBDTs(5)
 {}
 
-BDTReaderSplitLLDD::~BDTReaderSplitLLDD(){}
+BDTReaderSplitLLDDFDChi2::~BDTReaderSplitLLDDFDChi2(){}
 
-void BDTReaderSplitLLDD::Init(Looper *l){
-	cout << Form("%-30s","BDTReaderSplitLLDD::Init()") << " " << "Initialising Analyser (" << name << ")." << endl;
+void BDTReaderSplitLLDDFDChi2::Init(Looper *l){
+	cout << Form("%-30s","BDTReaderSplitLLDDFDChi2::Init()") << " " << "Initialising Analyser (" << name << ")." << endl;
 
 	// MVA
   readerContainer["LL"] = vector<TMVA::Reader*>();
@@ -39,37 +39,35 @@ void BDTReaderSplitLLDD::Init(Looper *l){
 		readerContainer["LL"][b]->AddVariable("B0_ARCCOS_DIRA_OWNPV",        	 &B0_ARCCOS_DIRA_OWNPV);
 		readerContainer["LL"][b]->AddVariable("B0_ENDVERTEX_CHI2",             &B0_ENDVERTEX_CHI2);
 		readerContainer["LL"][b]->AddVariable("B0_ISOLATION_BDT1_highq2",      &B0_ISOLATION_BDT1_highq2);
-		readerContainer["LL"][b]->AddVariable("B0_TAU",                        &B0_TAU);
+		readerContainer["LL"][b]->AddVariable("B0_FD_CHI2",                    &B0_FD_CHI2);
 		readerContainer["LL"][b]->AddVariable("gamgams_PT",                    &gamgams_PT);
-    readerContainer["LL"][b]->AddVariable("muminus_CosTheta",              &muminus_CosTheta);
 
 		readerContainer["DD"][b]->AddVariable("B0_P", 												 &B0_P);
 		readerContainer["DD"][b]->AddVariable("B0_PT",                         &B0_PT);
 		readerContainer["DD"][b]->AddVariable("B0_ARCCOS_DIRA_OWNPV",        	 &B0_ARCCOS_DIRA_OWNPV);
 		readerContainer["DD"][b]->AddVariable("B0_ENDVERTEX_CHI2",             &B0_ENDVERTEX_CHI2);
 		readerContainer["DD"][b]->AddVariable("B0_ISOLATION_BDT1_highq2",      &B0_ISOLATION_BDT1_highq2);
-		readerContainer["DD"][b]->AddVariable("B0_TAU",                        &B0_TAU);
+		readerContainer["DD"][b]->AddVariable("B0_FD_CHI2",                    &B0_FD_CHI2);
 		readerContainer["DD"][b]->AddVariable("gamgams_PT",                    &gamgams_PT);
-    readerContainer["DD"][b]->AddVariable("muminus_CosTheta",              &muminus_CosTheta);
 
     // Book MVA methods
-		weightsFile = Form("weights/BDTTrainerSplitLLDDFactoryLL%d_LL_BDT_%d.weights.xml",b,b);
+		weightsFile = Form("weights/BDTTrainerSplitLLDDFactoryRegieVarsLL%d_LL_BDT_%d.weights.xml",b,b);
 		methodName = Form("BDT%dmethod",b);
 		readerContainer["LL"][b]->BookMVA( methodName, weightsFile );
 
-    weightsFile = Form("weights/BDTTrainerSplitLLDDFactoryDD%d_DD_BDT_%d.weights.xml",b,b);
+    weightsFile = Form("weights/BDTTrainerSplitLLDDFactoryRegieVarsDD%d_DD_BDT_%d.weights.xml",b,b);
 		methodName = Form("BDT%dmethod",b);
 		readerContainer["DD"][b]->BookMVA( methodName, weightsFile );
 	}
 
 }
 
-void BDTReaderSplitLLDD::Term(Looper *l){
+void BDTReaderSplitLLDDFDChi2::Term(Looper *l){
 
-	cout << Form("%-30s","BDTReaderSplitLLDD::Term()") << " " << "Terminating Analyser (" << name << ")." << endl;
+	cout << Form("%-30s","BDTReaderSplitLLDDFDChi2::Term()") << " " << "Terminating Analyser (" << name << ")." << endl;
 }
 
-bool BDTReaderSplitLLDD::AnalyseEvent(Looper *l){
+bool BDTReaderSplitLLDDFDChi2::AnalyseEvent(Looper *l){
 
 	// Have to set everything as float because of TMVA
   B0_P            						= float(*l->B0_P);
@@ -77,7 +75,6 @@ bool BDTReaderSplitLLDD::AnalyseEvent(Looper *l){
   B0_ARCCOS_DIRA_OWNPV        = float(TMath::ACos(*l->B0_DIRA_OWNPV));
   B0_ENDVERTEX_CHI2           = float(*l->B0_ENDVERTEX_CHI2);
   B0_ISOLATION_BDT1_highq2    = float(*l->B0_ISOLATION_BDT1_highq2);
-  B0_TAU                      = float(*l->B0_TAU);
   B0_FD_CHI2                  = float(*l->B0_FD_CHI2);
 
   Jpsi_PT          						= float(*l->Jpsi_PT);
@@ -87,13 +84,6 @@ bool BDTReaderSplitLLDD::AnalyseEvent(Looper *l){
   gamgams_DIRA_OWNPV          = float(*l->gamgams_DIRA_OWNPV);
   gamgams_MINIPCHI2           = float(*l->gamgams_MINIPCHI2);
   gamgams_ENDVERTEX_CHI2      = float(*l->gamgams_ENDVERTEX_CHI2);
-
-  muminus_CosTheta            = float(*l->muminus_CosTheta);
-
-	// only KstarGamma
-	if ( l->itype == 72 || l->itype == 82 || l->itype == -88 || l->itype == -89 || l->itype == -90) {
-    muminus_CosTheta = float(*l->piminus_CosTheta);
-  }
 
   // get conversion track type
   TString trackType = "";
@@ -116,14 +106,8 @@ bool BDTReaderSplitLLDD::AnalyseEvent(Looper *l){
 
 	// bdt cut
   *l->pass_bdt = false;
-  if ( ( trackType == "LL" && *l->bdtoutput > 0.35 ) || ( trackType == "DD" && *l->bdtoutput > 0.45  ) ) {
+  if ( ( trackType == "LL" && *l->bdtoutput > 0.40 ) || ( trackType == "DD" && *l->bdtoutput > 0.45  ) ) {
     *l->pass_bdt = true;
-  }
-
-  // kst brem hack
-	if ( l->itype == 72 || l->itype == 82 || l->itype == -88 || l->itype == -89 || l->itype == -90) {
-    *l->gamgams_eminus_StandaloneBremMultiplicityD = double(*l->gamgams_eminus_StandaloneBremMultiplicity);
-    *l->gamgams_eplus_StandaloneBremMultiplicityD  = double(*l->gamgams_eplus_StandaloneBremMultiplicity);
   }
 
   //if ( !*l->pass_bdt ) return false;

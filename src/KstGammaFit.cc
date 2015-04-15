@@ -12,12 +12,17 @@ KstGammaFit::~KstGammaFit(){}
 void KstGammaFit::addObsVars(){
 
   addObsVar("B0_MM",         "m(K^{#pm}#pi^{#mp}#gamma)",  "MeV",    4500,   6000);
-  addObsVar("gamgams_PT",    "p_{T}(#gamma)",  "MeV",    0,      20e3);
-  addObsVar("B0_DIRA_OWNPV", "DIRA(B_{d})",    "",       0.99999,1.);
+  addObsVar("gamgams_PT",    "p_{T}(#gamma)",  "MeV",    0,      10e10);
+  addObsVar("B0_DIRA_OWNPV", "DIRA(B_{d})",    "",       0.9999,1.);
+  addObsVar("gamgams_eminus_StandaloneBremMultiplicityD","e^{-} Brem Multiplicity", "",0,4);
+  addObsVar("gamgams_eplus_StandaloneBremMultiplicityD","e^{+} Brem Multiplicity","",0,4);
 }
 
 void KstGammaFit::addCuts(){
-  addCut("bdtoutput",float(0.2),float(1.0));
+  //addCut("bdtoutput",float(0.2),float(1.0));
+  addCut("pass_bdt",true);
+  addCut("Kplus_PIDK", double(3.), double(999.));
+  addCut("piminus_PIDK",double(-999.), double(-3.));
 }
 
 void KstGammaFit::addDatasets(){
@@ -41,6 +46,26 @@ void KstGammaFit::addDatasets(){
   addDataset("MCKstGDD",  "MC (K*#gamma) DD",-88);
   addRequirement("MCKstGDD","eplus_TRACK_Type",          5);
   addRequirement("MCKstGDD","eminus_TRACK_Type",         5);
+
+  addDataset("MCKstG2011",    "MC (K*#gamma)",   -89);
+
+  addDataset("MCKstGLL2011",  "MC (K*#gamma) LL",-89);
+  addRequirement("MCKstGLL2011","eplus_TRACK_Type",          3);
+  addRequirement("MCKstGLL2011","eminus_TRACK_Type",         3);
+
+  addDataset("MCKstGDD2011",  "MC (K*#gamma) DD",-89);
+  addRequirement("MCKstGDD2011","eplus_TRACK_Type",          5);
+  addRequirement("MCKstGDD2011","eminus_TRACK_Type",         5);
+
+  addDataset("MCKstGSim06",    "MC (K*#gamma)",   -90);
+
+  addDataset("MCKstGLLSim06",  "MC (K*#gamma) LL",-90);
+  addRequirement("MCKstGLLSim06","eplus_TRACK_Type",          3);
+  addRequirement("MCKstGLLSim06","eminus_TRACK_Type",         3);
+
+  addDataset("MCKstGDDSim06",  "MC (K*#gamma) DD",-90);
+  addRequirement("MCKstGDDSim06","eplus_TRACK_Type",          5);
+  addRequirement("MCKstGDDSim06","eminus_TRACK_Type",         5);
 
 }
 
@@ -72,12 +97,12 @@ void KstGammaFit::constructPdfs(){
   defineParamSet("kstg_bkg_dd_pdf");
 
   // Bd2KstGamma TOTAL LL
-  w->factory("SUM::kstg_ll_pdf( kstg_sig_ll_y[0,2000]*kstg_sig_ll_pdf, kstg_bkg_ll_y[0,1000]*kstg_bkg_ll_pdf )");
+  w->factory("SUM::kstg_ll_pdf( kstg_sig_ll_y[0,10000]*kstg_sig_ll_pdf, kstg_bkg_ll_y[0,10000]*kstg_bkg_ll_pdf )");
   defineParamSet("kstg_ll_pdf");
   defineYieldSet("kstg_ll_pdf");
 
   // Bd2KstGamma TOTAL DD
-  w->factory("SUM::kstg_dd_pdf( kstg_sig_dd_y[0,2000]*kstg_sig_dd_pdf, kstg_bkg_dd_y[0,1000]*kstg_bkg_dd_pdf )");
+  w->factory("SUM::kstg_dd_pdf( kstg_sig_dd_y[0,10000]*kstg_sig_dd_pdf, kstg_bkg_dd_y[0,10000]*kstg_bkg_dd_pdf )");
   defineParamSet("kstg_dd_pdf");
   defineYieldSet("kstg_dd_pdf");
 
@@ -90,12 +115,16 @@ void KstGammaFit::run(){
   // fit LL sig MC
   fit("kstg_sig_ll_pdf","MCKstGLL");
   plot("B0_MM","MCKstGLL","kstg_sig_ll_pdf","LL MC Fit");
-  freeze("kstg_sig_ll_pdf");
+  //w->var("kstg_ll_mean")->setConstant(true);
+  //freeze("kstg_sig_ll_pdf");
+  //w->var("kstg_ll_sigma")->setConstant(false);
 
   // fit DD sig MC
   fit("kstg_sig_dd_pdf","MCKstGDD");
   plot("B0_MM","MCKstGDD","kstg_sig_dd_pdf","DD MC Fit");
-  freeze("kstg_sig_dd_pdf");
+  //w->var("kstg_dd_mean")->setConstant(true);
+  //freeze("kstg_sig_dd_pdf");
+  //w->var("kstg_dd_sigma")->setConstant(false);
 
   // fit LL data
   fit("kstg_ll_pdf","DataKstGLL");
@@ -110,15 +139,18 @@ void KstGammaFit::run(){
   // plot DD data
   makeDataPlotDD();
 
+  cout << "-------- Dataset Entries -------" << endl;
+  cout << "   KstG:   " << w->data("DataKstG")->numEntries() << endl;
+  cout << "   KstGLL: " << w->data("DataKstGLL")->numEntries() << endl;
+  cout << "   KstGDD: " << w->data("DataKstGDD")->numEntries() << endl;
+  cout << "--------------------------------" << endl;
+
   // splot LL
   sfit("kstg_ll_pdf","DataKstGLL");
   sproject("DataKstGLL","kstg_sig_ll_y");
 
   vector<TString> compDsetsLL;
   compDsetsLL.push_back("MCKstGLL");
-
-  splot("gamgams_PT",     "DataKstGLL_wsweights_proj_kstg_sig_ll_y", compDsetsLL, "LL sWeights", 10);
-  splot("B0_DIRA_OWNPV",  "DataKstGLL_wsweights_proj_kstg_sig_ll_y", compDsetsLL, "LL sWeights", 10);
 
   // splot DD
   sfit("kstg_dd_pdf","DataKstGDD");
@@ -127,8 +159,22 @@ void KstGammaFit::run(){
   vector<TString> compDsetsDD;
   compDsetsDD.push_back("MCKstGDD");
 
-  splot("gamgams_PT",     "DataKstGDD_wsweights_proj_kstg_sig_dd_y", compDsetsDD, "DD sWeights", 10);
-  splot("B0_DIRA_OWNPV",  "DataKstGDD_wsweights_proj_kstg_sig_dd_y", compDsetsDD, "DD sWeights", 10);
+  w->var("gamgams_PT")->setRange(0,20e3);
+
+  w->data("DataKstGLL_wsweights_proj_kstg_sig_ll_y")->SetTitle("Data (K*#gamma) DD sweighted");
+  w->data("DataKstGDD_wsweights_proj_kstg_sig_dd_y")->SetTitle("Data (K*#gamma) DD sweighted");
+
+  splot("gamgams_PT",     "DataKstGLL_wsweights_proj_kstg_sig_ll_y", compDsetsLL, "LL sWeights", 10, "_ll");
+  splot("B0_DIRA_OWNPV",  "DataKstGLL_wsweights_proj_kstg_sig_ll_y", compDsetsLL, "LL sWeights", 10, "_ll");
+
+  splot("gamgams_PT",     "DataKstGDD_wsweights_proj_kstg_sig_dd_y", compDsetsDD, "DD sWeights", 10, "_dd");
+  splot("B0_DIRA_OWNPV",  "DataKstGDD_wsweights_proj_kstg_sig_dd_y", compDsetsDD, "DD sWeights", 10, "_dd");
+
+  splot("gamgams_eplus_StandaloneBremMultiplicityD",     "DataKstGLL_wsweights_proj_kstg_sig_ll_y", compDsetsLL, "LL sWeights", 4, "_ll");
+  splot("gamgams_eminus_StandaloneBremMultiplicityD",    "DataKstGLL_wsweights_proj_kstg_sig_ll_y", compDsetsLL, "LL sWeights", 4, "_ll");
+
+  splot("gamgams_eplus_StandaloneBremMultiplicityD",     "DataKstGDD_wsweights_proj_kstg_sig_dd_y", compDsetsDD, "DD sWeights", 4, "_dd");
+  splot("gamgams_eminus_StandaloneBremMultiplicityD",    "DataKstGDD_wsweights_proj_kstg_sig_dd_y", compDsetsDD, "DD sWeights", 4, "_dd");
 }
 
 void KstGammaFit::makeDataPlotLL(){

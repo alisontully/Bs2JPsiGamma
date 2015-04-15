@@ -15,6 +15,7 @@ void AnalysisFit::addObsVars(){
 }
 
 void AnalysisFit::addCuts(){
+  addCut("pass_bdt",true);
 }
 
 void AnalysisFit::addDatasets(){

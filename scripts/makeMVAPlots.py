@@ -15,9 +15,9 @@ if not opts.interactive:
 import os
 
 # make output directories
-os.system('mkdir -p plots/MVATraining/pdf')
-os.system('mkdir -p plots/MVATraining/png')
-os.system('mkdir -p plots/MVATraining/C')
+os.system('mkdir -p plots/MVATrainingFDChi2/pdf')
+os.system('mkdir -p plots/MVATrainingFDChi2/png')
+os.system('mkdir -p plots/MVATrainingFDChi2/C')
 
 # get required files
 if not os.path.exists('scripts/tmvaglob.C'):
@@ -28,16 +28,16 @@ if not os.path.exists('scripts/mvas.C'):
   os.system('cp -r /Applications/root/tmva/test/mvas.C scripts/')
 
 r.gROOT.ProcessLine('.x scripts/mvas.C(\"%s\",CompareType)'%opts.infile)
-os.system('mv plots/overtrain_*.pdf plots/MVATraining/pdf')
-os.system('mv plots/overtrain_*.png plots/MVATraining/png')
-os.system('mv plots/overtrain_*.C plots/MVATraining/C')
+os.system('mv plots/overtrain_*.pdf plots/MVATrainingFDChi2/pdf')
+os.system('mv plots/overtrain_*.png plots/MVATrainingFDChi2/png')
+os.system('mv plots/overtrain_*.C plots/MVATrainingFDChi2/C')
 
 # make cut efficiency plots
 if not os.path.exists('scripts/mvaeffs.C'):
   os.system('cp -r /Applications/root/tmva/test/mvaeffs.C scripts/')
 
 r.gROOT.ProcessLine('.x scripts/mvaeffs.C(\"%s\",%f,%f)'%(opts.infile,float(opts.nsig),float(opts.nbkg)))
-os.system('mv plots/mvaeffs_*.pdf plots/MVATraining/pdf')
-os.system('mv plots/mvaeffs_*.png plots/MVATraining/png')
-os.system('mv plots/mvaeffs_*.C plots/MVATraining/C')
+os.system('mv plots/mvaeffs_*.pdf plots/MVATrainingFDChi2/pdf')
+os.system('mv plots/mvaeffs_*.png plots/MVATrainingFDChi2/png')
+os.system('mv plots/mvaeffs_*.C plots/MVATrainingFDChi2/C')
 
