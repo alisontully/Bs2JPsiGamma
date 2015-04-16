@@ -223,13 +223,13 @@ testf.Close()
 cls_info = []
 
 trees_to_run = list_of_trees
-if opts.Bd:
-  trees_to_run = list_of_trees[:-2]
-else:
-  trees_to_run = list_of_trees[:-1]
-
-if opts.wide:
-  trees_to_run = list_of_trees
+#if opts.Bd:
+#  trees_to_run = list_of_trees[:-2]
+#else:
+#  trees_to_run = list_of_trees[:-1]
+#
+#if opts.wide:
+#  trees_to_run = list_of_trees
 
 for tree in trees_to_run:
   #if tree == list_of_trees[-1] or tree == list_of_trees[-3]: continue

@@ -62,6 +62,9 @@ void RunCLs::setup(TString infile, TString outfile){
   bf_hypoth_vals.push_back(8.e-7);
   bf_hypoth_vals.push_back(9.e-7);
   bf_hypoth_vals.push_back(1.e-6);
+  bf_hypoth_vals.push_back(1.25e-6);
+  bf_hypoth_vals.push_back(1.50e-6);
+  bf_hypoth_vals.push_back(1.75e-6);
   bf_hypoth_vals.push_back(2.e-6);
   bf_hypoth_vals.push_back(3.e-6);
   bf_hypoth_vals.push_back(4.e-6);
