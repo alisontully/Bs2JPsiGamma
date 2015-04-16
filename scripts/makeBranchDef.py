@@ -6,9 +6,6 @@ def printUsage():
 	print '  -  It will inherit from the BranchDef class'
 	print '  -  All this will do is define the branches which should be read in and written out to file'
 	print '  -  This saves time as you don\'t have to read every branch'
-	print '  -  However it is highly recommend that your analyser implements the checkBranches() function'
-	print '     to check for NULL branches. Otherwise you may get some very weird behaviour from undefined'
-	print '     variables (THIS IS BEING FIXED NOW)'
 
 def readBranchesIn():
 
