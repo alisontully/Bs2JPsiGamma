@@ -51,10 +51,10 @@ void RunCLs::setup(TString infile, TString outfile){
   system("mkdir -p plots/stats/C");
 
   // for Bd ----
-  //bf_hypoth_vals.push_back(1.e-7);
-  //bf_hypoth_vals.push_back(2.e-7);
-  //bf_hypoth_vals.push_back(3.e-7);
-  //bf_hypoth_vals.push_back(4.e-7);
+  bf_hypoth_vals.push_back(1.e-7);
+  bf_hypoth_vals.push_back(2.e-7);
+  bf_hypoth_vals.push_back(3.e-7);
+  bf_hypoth_vals.push_back(4.e-7);
   // for both ----
   bf_hypoth_vals.push_back(5.e-7);
   bf_hypoth_vals.push_back(6.e-7);
