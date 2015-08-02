@@ -12,7 +12,7 @@ if opts.Bd: ext='bd'
 if opts.wide: ext += '_wide'
 
 import ROOT as r
-r.gROOT.ProcessLine('.x ~/Scratch/lhcb/lhcbStyle.C')
+r.gROOT.ProcessLine('.x ~/lhcbStyle.C')
 r.gROOT.SetBatch()
 
 cls_canvs = []
@@ -118,7 +118,7 @@ def getCLs(tree):
   real_btoy_fracs = [ 1.-quantiles[i]/100. for i in range(2*len(exp_sigma)+1) ]
   real_btoy_fracs.append(btoy_fracs[-1])
   assert(len(real_btoy_fracs)==len(btoy_fracs))
-
+ 
   cls_vals = [ sbtoy_fracs[i]/real_btoy_fracs[i] for i in range(len(real_btoy_fracs)) ]
   asymptotic_cls_vals = [ min(1.,r.TMath.Prob(x,1)/real_btoy_fracs[i]) for i, x in enumerate(test_stat_evals) ]
 
@@ -231,7 +231,8 @@ trees_to_run = list_of_trees
 #if opts.wide:
 #  trees_to_run = list_of_trees
 
-for tree in trees_to_run:
+for i, tree in enumerate(trees_to_run):
+  if i<4 or i==len(list_of_trees)-1: continue
   #if tree == list_of_trees[-1] or tree == list_of_trees[-3]: continue
   for fil in rel_files:
     tree.Add(fil)
@@ -289,9 +290,9 @@ dummy = r.TH1F('d','d',1,cls_info[0][0]*0.8,cls_info[-1][0]*1.2)
 canv = r.TCanvas()
 dummy.SetLineColor(0)
 dummy.GetYaxis().SetRangeUser(1.e-4,1)
-dummy.GetXaxis().SetTitle('B_{s} #rightarrow J/#psi#gamma BF')
+dummy.GetXaxis().SetTitle('BF ( B^{0}_{s} #rightarrow J/#psi#gamma )')
 if opts.Bd:
-  dummy.GetXaxis().SetTitle('B_{d} #rightarrow J/#psi#gamma BF')
+  dummy.GetXaxis().SetTitle('BF ( B^{0}_{d} #rightarrow J/#psi#gamma )')
 dummy.GetXaxis().SetTitleOffset(0.9)
 dummy.GetXaxis().SetTitleSize(0.08)
 dummy.GetYaxis().SetTitle('CL_{S}')
